@@ -1,0 +1,39 @@
+import heapq
+
+graph = {
+    'A': ['B', 'C'],     # Desde A podemos ir a B y C
+    'B': ['D', 'E'],     # Desde B podemos ir a D y E
+    'C': ['F'],          # Desde C podemos ir a F
+    'D': [],             # D no tiene vecinos
+    'E': ['F'],          # Desde E podemos ir a F
+    'F': []              # F no tiene vecinos
+}
+
+# Queremos ir del nodo 'A' al nodo 'F'
+start = 'A'
+goal = 'F'
+
+def dfs(graph, start, goal):
+    # Usamos una pila (stack) → LIFO: el último en entrar, primero en salir
+    stack = [[start]]
+    visited = set()
+
+    while stack:
+        path = stack.pop()  # Sacamos el último camino insertado
+        node = path[-1]
+
+        # Si encontramos el objetivo, devolvemos el camino
+        if node == goal:
+            return path
+
+        if node not in visited:
+            visited.add(node)
+
+            # Añadimos cada vecino al final de la pila
+            # Usamos reversed() para mantener un orden más legible (opcional)
+            for neighbor in reversed(graph[node]):
+                stack.append(path + [neighbor])
+
+    return None
+
+print("3️⃣ DFS:", dfs(graph, start, goal))

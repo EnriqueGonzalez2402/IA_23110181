@@ -1,0 +1,54 @@
+import heapq  # Usamos una cola de prioridad (mínimo costo primero)
+
+graph = {
+    'A': ['B', 'C'],     # Desde A podemos ir a B y C
+    'B': ['D', 'E'],     # Desde B podemos ir a D y E
+    'C': ['F'],          # Desde C podemos ir a F
+    'D': [],             # D no tiene vecinos
+    'E': ['F'],          # Desde E podemos ir a F
+    'F': []              # F no tiene vecinos
+}
+
+costs = {
+    ('A', 'B'): 2,
+    ('A', 'C'): 1,
+    ('B', 'D'): 3,
+    ('B', 'E'): 1,
+    ('C', 'F'): 4,
+    ('E', 'F'): 1
+}
+
+# Queremos ir del nodo 'A' al nodo 'F'
+start = 'A'
+goal = 'F'
+
+def ucs(graph, start, goal, costs):
+    # Cada elemento en la cola tiene la forma (costo_acumulado, camino)
+    queue = [(0, [start])]
+    visited = set()
+
+    while queue:
+        # Sacamos el camino con menor costo acumulado hasta ahora
+        cost, path = heapq.heappop(queue)
+        node = path[-1]  # Último nodo del camino
+
+        # Si llegamos al objetivo, devolvemos el camino y su costo total
+        if node == goal:
+            return path, cost
+
+        # Si el nodo no ha sido visitado...
+        if node not in visited:
+            visited.add(node)
+
+            # Recorremos cada vecino del nodo actual
+            for neighbor in graph[node]:
+                # Calculamos el costo total del nuevo camino
+                new_cost = cost + costs.get((node, neighbor), 1)
+                new_path = path + [neighbor]
+                # Insertamos el nuevo camino en la cola de prioridad
+                heapq.heappush(queue, (new_cost, new_path))
+
+    return None, float('inf')
+
+path_ucs, cost_ucs = ucs(graph, start, goal, costs)
+print("Costo uniforme:", path_ucs, "Costo:", cost_ucs)
