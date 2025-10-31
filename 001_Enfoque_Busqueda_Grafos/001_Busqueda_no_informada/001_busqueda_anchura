@@ -1,0 +1,67 @@
+# "Búsqueda en Anchura (BFS)"
+
+from collections import deque
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
+
+# Queremos ir del nodo 'A' al nodo 'F'
+start = 'A'
+goal = 'F'
+
+def bfs(graph, start, goal):
+    # Cola para almacenar rutas (FIFO)
+    queue = deque([[start]])
+    # Conjunto para nodos visitados
+    visited = set()
+    
+    while queue:
+        # Saca la primera ruta en la cola
+        path = queue.popleft()
+        # Último nodo del camino actual
+        node = path[-1]
+        
+        # Si encontramos el objetivo, devolvemos el camino
+        if node == goal:
+            return path
+        
+        # Evita visitar el mismo nodo dos veces
+        if node not in visited:
+            visited.add(node)
+            # Agrega rutas extendidas con los vecinos
+            for neighbor in graph[node]:
+                new_path = list(path)
+                new_path.append(neighbor)
+                queue.append(new_path)
+    return None
+
+# Ejecución
+path_bfs = bfs(graph, start, goal)
+print("1️⃣ Búsqueda en Anchura:", path_bfs)
+# --- Ejemplo de uso ---
+# Defino un grafo como un diccionario de listas de adyacencia
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['B', 'F'],
+    'F': ['C', 'E', 'G'],
+    'G': ['F']
+}
+
+start_node = 'A'
+goal_node = 'G'
+
+print(f"Buscando camino de {start_node} a {goal_node} usando BFS...")
+path = bfs(graph, start_node, goal_node)
+
+if path:
+    print(f"Camino encontrado: {' -> '.join(path)}")
+else:
+    print("No se encontró un camino.")
