@@ -1,0 +1,46 @@
+import numpy as np
+
+# Estados ocultos
+estados = ['lluvia', 'soleado']
+N = len(estados)
+
+# Observaciones
+observaciones = ['mojado', 'seco']
+M = len(observaciones)
+
+# Secuencia observada
+seq_obs = ['mojado', 'mojado', 'seco']
+
+# Probabilidades iniciales
+pi = np.array([0.5, 0.5])
+
+# Matriz de transición
+A = np.array([[0.7,0.3],
+              [0.4,0.6]])
+
+# Matriz de emisión
+B = np.array([[0.9,0.1],
+              [0.2,0.8]])
+
+T_len = len(seq_obs)
+alpha = np.zeros((T_len, N))
+beta = np.zeros((T_len, N))
+
+# Adelante
+alpha[0,:] = pi * B[:, observaciones.index(seq_obs[0])]
+for t in range(1, T_len):
+    for j in range(N):
+        alpha[t,j] = B[j, observaciones.index(seq_obs[t])] * np.sum(alpha[t-1,:]*A[:,j])
+
+# Atrás
+beta[-1,:] = 1
+for t in reversed(range(T_len-1)):
+    for i in range(N):
+        beta[t,i] = np.sum(A[i,:]*B[:, observaciones.index(seq_obs[t+1])]*beta[t+1,:])
+
+# Posterior
+posterior = alpha * beta
+posterior = posterior / posterior.sum(axis=1, keepdims=True)
+
+print("Probabilidad posterior de estados ocultos:")
+print(posterior)

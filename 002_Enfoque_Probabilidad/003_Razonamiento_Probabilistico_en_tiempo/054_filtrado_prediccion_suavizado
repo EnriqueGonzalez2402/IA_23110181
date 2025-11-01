@@ -1,0 +1,46 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generamos datos simulados: un movimiento suave con ruido
+np.random.seed(0)
+T = 50
+x_true = np.linspace(0, 10, T)            # estado real (por ejemplo, temperatura real)
+y_meas = x_true + np.random.normal(0, 0.5, T)  # mediciones ruidosas
+
+# ---------------------------------------------
+# 1️⃣ Filtrado: eliminamos ruido (promedio móvil)
+# ---------------------------------------------
+window = 3
+y_filtered = np.convolve(y_meas, np.ones(window)/window, mode='valid')
+
+# ---------------------------------------------
+# 2️⃣ Predicción: extrapolamos tendencia futura
+# ---------------------------------------------
+# Usamos una regresión lineal simple sobre las últimas muestras filtradas
+coef = np.polyfit(np.arange(len(y_filtered)), y_filtered, 1)
+trend = np.poly1d(coef)
+future_steps = 5
+y_pred = trend(np.arange(len(y_filtered), len(y_filtered)+future_steps))
+
+# ---------------------------------------------
+# 3️⃣ Suavizado: combinación entre filtrado y predicción
+# ---------------------------------------------
+# Igualamos tamaños recortando al mínimo común
+min_len = min(len(y_filtered), len(y_meas[:len(y_filtered)]))
+y_smooth = (y_filtered[:min_len] + y_meas[:min_len]) / 2
+
+# ---------------------------------------------
+# Graficamos resultados
+# ---------------------------------------------
+plt.figure(figsize=(10,6))
+plt.plot(x_true, label="Estado real (sin ruido)", linewidth=2)
+plt.plot(y_meas, label="Mediciones ruidosas", linestyle='--', alpha=0.6)
+plt.plot(np.arange(len(y_filtered)), y_filtered, label="Filtrado (promedio móvil)", linewidth=2)
+plt.plot(np.arange(len(y_smooth)), y_smooth, label="Suavizado (mixto)", linewidth=2)
+plt.plot(np.arange(len(y_filtered), len(y_filtered)+future_steps), y_pred, 'r--', label="Predicción", linewidth=2)
+plt.legend()
+plt.title("Filtrado, Predicción y Suavizado de una Serie Ruidosa")
+plt.xlabel("Tiempo")
+plt.ylabel("Valor")
+plt.grid(True)
+plt.show()
