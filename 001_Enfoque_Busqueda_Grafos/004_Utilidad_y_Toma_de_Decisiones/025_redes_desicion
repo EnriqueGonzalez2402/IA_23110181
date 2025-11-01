@@ -1,0 +1,18 @@
+# Ejemplo: decidir si llevar paraguas según probabilidad de lluvia.
+prob_lluvia = 0.5
+utilidad_con_paraguas = 8    # No te mojas, pero es algo incómodo
+utilidad_sin_paraguas_lluvia = 0  # Te mojas :(
+utilidad_sin_paraguas_sol = 10    # Día perfecto
+
+# Cálculo de utilidad esperada
+UE_con_paraguas = utilidad_con_paraguas
+UE_sin_paraguas = prob_lluvia * utilidad_sin_paraguas_lluvia + (1 - prob_lluvia) * utilidad_sin_paraguas_sol
+
+print("25️⃣ Red de Decisión:")
+print(f"Utilidad Esperada (con paraguas): {UE_con_paraguas}")
+print(f"Utilidad Esperada (sin paraguas): {UE_sin_paraguas}")
+
+if UE_con_paraguas > UE_sin_paraguas:
+    print("👉 Decisión óptima: Llevar paraguas ☂️")
+else:
+    print("👉 Decisión óptima: No llevar paraguas 🌞")

@@ -1,0 +1,16 @@
+# Calcula cuánto vale obtener información adicional (por ejemplo, pronóstico del clima)
+# antes de tomar una decisión.
+
+prob_lluvia = 0.9
+UE_actual = max(8, prob_lluvia*0 + (1 - prob_lluvia)*10)  # Mejor entre paraguas o no
+
+# Supongamos que el pronóstico nos dice si lloverá o no con certeza
+# Valor Esperado con información perfecta
+UE_info_perfecta = prob_lluvia * max(8, 0) + (1 - prob_lluvia) * max(8, 10)
+
+valor_informacion = UE_info_perfecta - UE_actual
+
+print("26️⃣ Valor de la Información:")
+print(f"Utilidad esperada actual: {UE_actual}")
+print(f"Utilidad esperada con información perfecta: {UE_info_perfecta}")
+print(f"Valor de la información: {valor_informacion:.2f}")
