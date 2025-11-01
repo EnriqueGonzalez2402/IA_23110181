@@ -1,0 +1,45 @@
+# Clasificador Naive Bayes para correos electrónicos SPAM vs NO-SPAM
+# ---------------------------------------------------
+
+from collections import Counter
+import math
+
+# Conjunto de entrenamiento
+emails = [
+    ("oferta gratis dinero", "spam"),
+    ("gana dinero fácil", "spam"),
+    ("trabajo desde casa", "spam"),
+    ("reunión con el jefe", "no_spam"),
+    ("informe del proyecto", "no_spam"),
+    ("cita con cliente", "no_spam")
+]
+
+# Calcular probabilidades por clase
+clases = ["spam", "no_spam"]
+vocabulario = set()
+conteo_palabras = {c: Counter() for c in clases}
+conteo_clase = Counter()
+
+for texto, clase in emails:
+    palabras = texto.split()
+    conteo_palabras[clase].update(palabras)
+    conteo_clase[clase] += 1
+    vocabulario.update(palabras)
+
+# Clasificación de nuevo correo
+nuevo = "dinero gratis trabajo"
+
+def clasificar(texto):
+    palabras = texto.split()
+    scores = {}
+    for clase in clases:
+        # P(clase)
+        scores[clase] = math.log(conteo_clase[clase] / sum(conteo_clase.values()))
+        # P(palabra|clase)
+        total_palabras = sum(conteo_palabras[clase].values())
+        for palabra in palabras:
+            freq = conteo_palabras[clase][palabra]
+            scores[clase] += math.log((freq + 1) / (total_palabras + len(vocabulario)))  # suavizado de Laplace
+    return max(scores, key=scores.get)
+
+print("📩 Clasificación del mensaje:", clasificar(nuevo))

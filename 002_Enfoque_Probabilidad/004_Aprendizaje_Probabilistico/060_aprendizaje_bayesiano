@@ -1,0 +1,36 @@
+# Ejemplo de Aprendizaje Bayesiano:
+# Actualiza una probabilidad P(H|D) a medida que llegan nuevas observaciones D.
+# ---------------------------------------------------
+
+import matplotlib.pyplot as plt
+
+# Hipótesis: "El paciente tiene una enfermedad"
+P_H = 0.01  # Probabilidad previa (1%)
+P_D_dado_H = 0.9   # Probabilidad de test positivo si tiene enfermedad
+P_D_dado_noH = 0.05  # Probabilidad de falso positivo
+
+# Datos simulados: resultados de 20 pruebas (True=positivo, False=negativo)
+datos = [True, False, True, True, False, True, True, True, False, True,
+         True, True, False, True, True, True, False, True, True, True]
+
+posterior = []
+
+for i, D in enumerate(datos):
+    # Calcular probabilidad de evidencia
+    P_D = P_D_dado_H * P_H + P_D_dado_noH * (1 - P_H)
+
+    # Actualizar posterior según el resultado
+    if D:  # test positivo
+        P_H = (P_D_dado_H * P_H) / P_D
+    else:  # test negativo
+        P_H = ((1 - P_D_dado_H) * P_H) / ((1 - P_D_dado_H) * P_H + (1 - P_D_dado_noH) * (1 - P_H))
+
+    posterior.append(P_H)
+
+# Visualizamos la actualización de la creencia
+plt.plot(range(1, len(datos)+1), posterior, marker='o')
+plt.xlabel("Número de pruebas observadas")
+plt.ylabel("Probabilidad posterior P(H|D)")
+plt.title("Aprendizaje Bayesiano: actualización de creencia")
+plt.grid(True)
+plt.show()
