@@ -1,0 +1,29 @@
+# Estimación de P(L=True | S=True) usando MCMC
+# ----------------------------------------
+import random
+
+P_L = 0.3
+P_S_dado_L = {True:0.9, False:0.1}
+num_samples = 10000
+
+# Estado inicial aleatorio
+L = random.choice([True, False])
+samples = []
+
+for _ in range(num_samples):
+    # Proponemos cambiar el estado actual (flip)
+    L_propuesta = not L
+    # Calculamos probabilidad de evidencia para estado actual y propuesto
+    prob_L = P_S_dado_L[L]  
+    prob_L_prop = P_S_dado_L[L_propuesta]
+    # Probabilidad de aceptación
+    acept = min(1, prob_L_prop/prob_L)
+    # Decidimos si aceptamos el cambio
+    if random.random() < acept:
+        L = L_propuesta
+    # Guardamos la muestra
+    samples.append(L)
+
+# Estimación posterior
+P_L_given_S = sum(samples)/num_samples
+print(f"P(L=True | S=True) ≈ {P_L_given_S:.3f}")

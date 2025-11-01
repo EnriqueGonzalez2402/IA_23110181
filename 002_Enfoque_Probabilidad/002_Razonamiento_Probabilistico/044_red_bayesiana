@@ -1,0 +1,38 @@
+# Red Bayesiana simple: Lluvia -> Nubes -> Suelo Mojado
+# Objetivo: calcular P(Lluvia=True | Suelo Mojado=True)
+# ----------------------------------------
+from itertools import product  # Para generar combinaciones de estados
+
+# Definimos los posibles estados de cada variable
+L = [True, False]  # Lluvia
+N = [True, False]  # Nubes
+S = [True, False]  # Suelo mojado
+
+# Probabilidad a priori de Lluvia
+P_L = 0.3
+
+# Probabilidades condicionales
+P_N_dado_L = {True: 0.8, False: 0.2}  # P(Nubes=True | Lluvia)
+P_S_dado_L = {True: 0.9, False: 0.1}  # P(Suelo=True | Lluvia)
+
+# Inicializamos acumuladores para enumeración
+prob_total = 0          # Suma de todas las probabilidades donde S=True
+prob_L_dado_S = 0       # Suma de probabilidades donde L=True y S=True
+
+# Enumeramos todos los posibles estados de las variables
+for l, n, s in product(L, N, S):
+    # Calculamos probabilidad conjunta usando independencia condicional
+    # P(L,N,S) = P(L) * P(N|L) * P(S|L)
+    prob = (P_L if l else 1-P_L)
+    prob *= P_N_dado_L[l] if n else 1-P_N_dado_L[l]
+    prob *= P_S_dado_L[l] if s else 1-P_S_dado_L[l]
+
+    # Filtramos solo los escenarios donde S=True (evidencia)
+    if s:
+        prob_total += prob         # Acumulamos para normalización
+        if l:
+            prob_L_dado_S += prob  # Acumulamos donde L=True
+
+# Calculamos probabilidad posterior usando regla de Bayes
+P_L_given_S = prob_L_dado_S / prob_total
+print(f"P(Lluvia=True | Suelo mojado) = {P_L_given_S:.3f}")

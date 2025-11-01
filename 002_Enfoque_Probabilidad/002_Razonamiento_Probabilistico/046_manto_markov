@@ -1,0 +1,29 @@
+
+# Cadena de Markov simple para clima
+# Cada día depende solo del día anterior
+# ----------------------------------------
+import random
+
+# Estados posibles
+estados = ['soleado', 'nublado', 'lluvioso']
+
+# Matriz de transición: P(siguiente_estado | estado_actual)
+transicion = {
+    'soleado': {'soleado':0.6, 'nublado':0.3, 'lluvioso':0.1},
+    'nublado': {'soleado':0.3, 'nublado':0.4, 'lluvioso':0.3},
+    'lluvioso': {'soleado':0.2, 'nublado':0.3, 'lluvioso':0.5}
+}
+
+# Estado inicial
+estado_actual = 'soleado'
+historial = [estado_actual]
+
+# Simulamos 10 días
+for dia in range(1, 11):
+    prob = list(transicion[estado_actual].values())       # probabilidades de transición
+    estados_posibles = list(transicion[estado_actual].keys())
+    # Elegimos siguiente estado según probabilidad
+    estado_actual = random.choices(estados_posibles, prob)[0]
+    historial.append(estado_actual)
+
+print("Simulación de clima 10 días:", historial)

@@ -1,0 +1,24 @@
+# Aproximación de P(L=True | S=True) usando muestreo por rechazo
+# ----------------------------------------
+import random
+
+P_L = 0.3
+P_S_dado_L = {True:0.9, False:0.1}
+num_samples = 10000  # Número de muestras
+
+aceptados = 0      # Contador de muestras que cumplen la evidencia S=True
+L_true_given_S = 0  # Contador de L=True en muestras aceptadas
+
+for _ in range(num_samples):
+    # Generamos L según P(L)
+    l = random.random() < P_L
+    # Generamos S según P(S|L)
+    s = random.random() < (P_S_dado_L[l] if l else 1-P_S_dado_L[l])
+
+    if s:  # Solo aceptamos muestras donde S=True (rechazamos las demás)
+        aceptados += 1
+        if l:
+            L_true_given_S += 1
+
+# Estimación aproximada
+print(f"P(L=True | S=True) ≈ {L_true_given_S/aceptados:.3f}")

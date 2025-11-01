@@ -1,0 +1,34 @@
+# Calculamos P(L=True | S=True) usando enumeración completa
+# ----------------------------------------
+from itertools import product  # Para generar todas las combinaciones posibles
+
+# Definimos las variables y sus posibles valores
+L = [True, False]  # Lluvia
+N = [True, False]  # Nubes
+S = [True, False]  # Suelo mojado
+
+# Probabilidades a priori y condicionales
+P_L = 0.3
+P_N_dado_L = {True: 0.8, False: 0.2}  # P(N=True|L)
+P_S_dado_L = {True: 0.9, False: 0.1}  # P(S=True|L)
+
+# Inicializamos contadores
+total = 0        # Suma de probabilidades de todos los escenarios donde S=True
+numerador = 0    # Suma de probabilidades donde L=True y S=True
+
+# Enumeramos todas las combinaciones de L, N y S
+for l, n, s in product(L, N, S):
+    # Probabilidad conjunta usando independencia condicional
+    prob = (P_L if l else 1-P_L)                      # P(L)
+    prob *= P_N_dado_L[l] if n else 1-P_N_dado_L[l]  # P(N|L)
+    prob *= P_S_dado_L[l] if s else 1-P_S_dado_L[l]  # P(S|L)
+
+    # Filtramos solo los escenarios donde S=True (evidencia)
+    if s:
+        total += prob         # Acumulamos para la normalización
+        if l:
+            numerador += prob  # Acumulamos escenarios donde L=True
+
+# Probabilidad posterior usando regla de Bayes
+P_L_given_S = numerador / total
+print(f"P(L=True | S=True) = {P_L_given_S:.3f}")

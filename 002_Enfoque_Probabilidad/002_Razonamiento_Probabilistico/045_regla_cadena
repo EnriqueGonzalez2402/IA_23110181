@@ -1,0 +1,27 @@
+# Probabilidad conjunta usando la regla de la cadena
+# P(A,B,C) = P(A) * P(B|A) * P(C|A,B)
+# ----------------------------------------
+from itertools import product
+
+# Posibles estados
+A = [True, False]
+B = [True, False]
+C = [True, False]
+
+# Probabilidades condicionales
+P_A = 0.3
+P_B_dado_A = {True: 0.7, False: 0.2}
+P_C_dado_A_B = {
+    (True, True): 0.9,
+    (True, False): 0.5,
+    (False, True): 0.4,
+    (False, False): 0.1
+}
+
+# Enumeramos todas las combinaciones
+for a, b, c in product(A, B, C):
+    # Calculamos P(A,B,C) según la regla de la cadena
+    p = (P_A if a else 1-P_A)
+    p *= P_B_dado_A[a] if b else 1-P_B_dado_A[a]
+    p *= P_C_dado_A_B[(a,b)] if c else 1-P_C_dado_A_B[(a,b)]
+    print(f"A={a}, B={b}, C={c} => P={p:.5f}")

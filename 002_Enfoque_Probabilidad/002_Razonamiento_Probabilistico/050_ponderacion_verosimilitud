@@ -1,0 +1,23 @@
+# Aproximación de P(L=True | S=True) ponderando por verosimilitud
+# ----------------------------------------
+import random
+
+P_L = 0.3
+P_S_dado_L = {True:0.9, False:0.1}
+num_samples = 10000
+
+peso_total = 0    # Suma de todos los pesos
+peso_L_true = 0   # Suma de pesos donde L=True
+
+for _ in range(num_samples):
+    # Muestreamos L según P(L)
+    l = random.random() < P_L
+    # Peso = probabilidad de observar la evidencia S=True dado L
+    peso = P_S_dado_L[l]  
+    peso_total += peso
+    if l:
+        peso_L_true += peso
+
+# Estimación posterior usando ponderación
+P_L_given_S = peso_L_true / peso_total
+print(f"P(L=True | S=True) ≈ {P_L_given_S:.3f}")

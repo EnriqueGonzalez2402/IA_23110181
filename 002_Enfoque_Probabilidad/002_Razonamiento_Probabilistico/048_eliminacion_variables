@@ -1,0 +1,33 @@
+# Calculamos P(L=True | S=True) eliminando la variable N
+# ----------------------------------------
+from itertools import product
+
+# Variables
+L = [True, False]
+N = [True, False]
+S = [True, False]
+
+# Probabilidades a priori y condicionales
+P_L = 0.3
+P_N_dado_L = {True:0.8, False:0.2}
+P_S_dado_L = {True:0.9, False:0.1}
+
+# Eliminamos N sumando sobre todas sus posibilidades
+# P(L,S) = Σ_N P(L) * P(N|L) * P(S|L)
+numerador = sum(
+    (P_L if l else 1-P_L) *
+    (P_N_dado_L[l] if n else 1-P_N_dado_L[l]) *
+    (P_S_dado_L[l] if True else 1-P_S_dado_L[l])
+    for l in L for n in N
+)
+
+# Para normalizar P(L|S=True), necesitamos P(S=True)
+denominador = sum(
+    (P_L if l else 1-P_L) *
+    (P_N_dado_L[l] if n else 1-P_N_dado_L[l]) *
+    (P_S_dado_L[l] if s else 1-P_S_dado_L[l])
+    for l in L for n in N for s in S
+)
+
+P_L_given_S = numerador / denominador
+print(f"P(L=True | S=True) = {P_L_given_S:.3f}")
