@@ -1,0 +1,54 @@
+import random
+
+def online_search(start, goal, discover_graph_func):
+    """
+    start: nodo inicial
+    goal: nodo objetivo
+    discover_graph_func(node) -> vecinos: función que revela vecinos del nodo actual
+    """
+    current = start
+    path = [current]
+
+    # Mantener un conjunto de nodos visitados para no repetir
+    visited = set([current])
+
+    while current != goal:
+        # Descubrimos vecinos de forma “online”
+        neighbors = discover_graph_func(current)
+        # Filtramos vecinos ya visitados
+        neighbors = [n for n in neighbors if n not in visited]
+
+        if not neighbors:
+            # Si no hay vecinos nuevos, retrocedemos
+            if len(path) == 1:
+                # Sin camino posible
+                return None
+            path.pop()
+            current = path[-1]
+            continue
+
+        # Selección aleatoria del siguiente nodo (puede implementarse heurística local)
+        next_node = random.choice(neighbors)
+        path.append(next_node)
+        visited.add(next_node)
+        current = next_node
+
+    return path
+
+# Ejemplo de función que simula el descubrimiento del grafo
+full_graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
+
+def discover_graph(node):
+    # Solo revela los vecinos del nodo actual
+    return full_graph.get(node, [])
+
+# Ejecutamos búsqueda online
+path_online = online_search('A', 'F', discover_graph)
+print("1️⃣6️⃣ Búsqueda Online:", path_online)
