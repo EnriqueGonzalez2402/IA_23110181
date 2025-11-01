@@ -34,6 +34,7 @@ def dfs_limited(graph, start, goal, limit):
 
     # Iniciamos la búsqueda desde el nodo inicial
     return dfs_recursive(start, [start], 0)
+
     
 def dfs_iterative(graph, start, goal, max_depth):
     # Vamos incrementando el límite de profundidad en cada iteración
