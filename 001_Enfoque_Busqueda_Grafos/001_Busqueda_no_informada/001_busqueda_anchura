@@ -1,13 +1,12 @@
-# "Búsqueda en Anchura (BFS)"
 
 from collections import deque
 graph = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F'],
-    'D': [],
-    'E': ['F'],
-    'F': []
+    'A': ['B', 'C'],     # Desde A podemos ir a B y C
+    'B': ['D', 'E'],     # Desde B podemos ir a D y E
+    'C': ['F'],          # Desde C podemos ir a F
+    'D': [],             # D no tiene vecinos
+    'E': ['F'],          # Desde E podemos ir a F
+    'F': []              # F no tiene vecinos
 }
 
 # Queremos ir del nodo 'A' al nodo 'F'
