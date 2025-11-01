@@ -1,0 +1,57 @@
+from collections import deque
+
+graph = {
+    'A': ['B', 'C'],     # Desde A podemos ir a B y C
+    'B': ['D', 'E'],     # Desde B podemos ir a D y E
+    'C': ['F'],          # Desde C podemos ir a F
+    'D': [],             # D no tiene vecinos
+    'E': ['F'],          # Desde E podemos ir a F
+    'F': []              # F no tiene vecinos
+}
+
+# Queremos ir del nodo 'A' al nodo 'F'
+start = 'A'
+goal = 'E'
+
+
+def bidirectional_search(graph, start, goal):
+    # Caso trivial: inicio y meta son iguales
+    if start == goal: 
+        return [start]
+
+    # Dos colas, una desde el inicio y otra desde la meta
+    queue_start = deque([[start]])
+    queue_goal = deque([[goal]])
+
+    # Diccionarios que guardan los caminos desde cada extremo
+    visited_start = {start: [start]}
+    visited_goal = {goal: [goal]}
+
+    while queue_start and queue_goal:
+        # --- Expansión desde el inicio ---
+        path_s = queue_start.popleft()
+        node_s = path_s[-1]
+        for neighbor in graph[node_s]:
+            if neighbor not in visited_start:
+                new_path = path_s + [neighbor]
+                visited_start[neighbor] = new_path
+                queue_start.append(new_path)
+                # Si el nodo ya fue alcanzado desde la meta → se encontraron
+                if neighbor in visited_goal:
+                    return new_path + visited_goal[neighbor][-2::-1]
+
+        # --- Expansión desde la meta ---
+        path_g = queue_goal.popleft()
+        node_g = path_g[-1]
+        for neighbor in graph[node_g]:
+            if neighbor not in visited_goal:
+                new_path = path_g + [neighbor]
+                visited_goal[neighbor] = new_path
+                queue_goal.append(new_path)
+                # Si el nodo ya fue alcanzado desde el inicio → se encontraron
+                if neighbor in visited_start:
+                    return visited_start[neighbor] + new_path[-2::-1]
+
+    return None
+
+print("6️⃣ Bidireccional:", bidirectional_search(graph, start, goal))

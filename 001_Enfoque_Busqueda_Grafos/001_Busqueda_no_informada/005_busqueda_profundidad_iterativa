@@ -1,0 +1,47 @@
+graph = {
+    'A': ['B', 'C'],     # Desde A podemos ir a B y C
+    'B': ['D', 'E'],     # Desde B podemos ir a D y E
+    'C': ['F'],          # Desde C podemos ir a F
+    'D': [],             # D no tiene vecinos
+    'E': ['F'],          # Desde E podemos ir a F
+    'F': []              # F no tiene vecinos
+}
+
+# Queremos ir del nodo 'A' al nodo 'F'
+start = 'A'
+goal = 'F'
+
+def dfs_limited(graph, start, goal, limit):
+    # Versión recursiva de DFS con límite de profundidad
+
+    def dfs_recursive(node, path, depth):
+        # Si superamos el límite, detenemos esta rama
+        if depth > limit:
+            return None
+
+        # Si encontramos el objetivo, devolvemos el camino
+        if node == goal:
+            return path
+
+        # Exploramos los vecinos si aún no llegamos al límite
+        for neighbor in graph[node]:
+            result = dfs_recursive(neighbor, path + [neighbor], depth + 1)
+            if result:
+                return result
+
+        # Si ninguno funcionó, regresamos None
+        return None
+
+    # Iniciamos la búsqueda desde el nodo inicial
+    return dfs_recursive(start, [start], 0)
+    
+def dfs_iterative(graph, start, goal, max_depth):
+    # Vamos incrementando el límite de profundidad en cada iteración
+    for limit in range(max_depth + 1):
+        result = dfs_limited(graph, start, goal, limit)
+        if result:
+            return result, limit
+    return None, None
+
+path_iddfs, depth_iddfs = dfs_iterative(graph, start, goal, 5)
+print("5️⃣ DFS Iterativa:", path_iddfs, "Profundidad encontrada:", depth_iddfs)
