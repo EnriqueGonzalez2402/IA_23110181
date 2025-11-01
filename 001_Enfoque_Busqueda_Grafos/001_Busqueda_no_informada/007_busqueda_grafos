@@ -1,0 +1,47 @@
+graph = {
+    'A': ['B', 'C'],     # Desde A podemos ir a B y C
+    'B': ['D', 'E'],     # Desde B podemos ir a D y E
+    'C': ['F'],          # Desde C podemos ir a F
+    'D': [],             # D no tiene vecinos
+    'E': ['F'],          # Desde E podemos ir a F
+    'F': []              # F no tiene vecinos
+}
+
+# Queremos ir del nodo 'A' al nodo 'F'
+start = 'A'
+goal = 'F'
+
+
+def graph_search(graph, start, goal, strategy='bfs'):
+    # Elegimos estructura según la estrategia
+    if strategy == 'bfs':
+        from collections import deque
+        frontier = deque([[start]])  # Cola (FIFO)
+    else:
+        frontier = [[start]]         # Pila (LIFO para DFS)
+
+    visited = set()
+
+    while frontier:
+        # Sacamos el siguiente camino según la estrategia
+        path = frontier.popleft() if strategy == 'bfs' else frontier.pop()
+        node = path[-1]
+
+        # Si llegamos a la meta, devolvemos el camino
+        if node == goal:
+            return path
+
+        if node not in visited:
+            visited.add(node)
+            # Añadimos vecinos al contenedor correspondiente
+            for neighbor in graph[node]:
+                new_path = path + [neighbor]
+                if strategy == 'bfs':
+                    frontier.append(new_path)
+                else:
+                    frontier.append(new_path)
+
+    return None
+
+print("7️⃣ General BFS:", graph_search(graph, start, goal, 'bfs'))
+print("7️⃣ General DFS:", graph_search(graph, start, goal, 'dfs'))
