@@ -1,0 +1,15 @@
+# Ejemplo simple: tres variables X, Y, Z con dominio {1,2,3}
+variables = ['X', 'Y', 'Z']
+domains = {v: [1,2,3] for v in variables}
+
+# Restricciones: X != Y, Y != Z, X != Z
+def constraints(assignment):
+    if 'X' in assignment and 'Y' in assignment and assignment['X'] == assignment['Y']:
+        return False
+    if 'Y' in assignment and 'Z' in assignment and assignment['Y'] == assignment['Z']:
+        return False
+    if 'X' in assignment and 'Z' in assignment and assignment['X'] == assignment['Z']:
+        return False
+    return True
+
+print("17️⃣ CSP básico listo, dominios y restricciones definidos")
