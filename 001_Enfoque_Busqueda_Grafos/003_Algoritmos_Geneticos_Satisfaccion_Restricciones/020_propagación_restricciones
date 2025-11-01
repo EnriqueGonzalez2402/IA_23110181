@@ -1,0 +1,44 @@
+# Ejemplo simple: tres variables X, Y, Z con dominio {1,2,3}
+variables = ['X', 'Y', 'Z']
+domains = {v: [1,2,3] for v in variables}
+
+# Restricciones: X != Y, Y != Z, X != Z
+def constraints(assignment):
+    if 'X' in assignment and 'Y' in assignment and assignment['X'] == assignment['Y']:
+        return False
+    if 'Y' in assignment and 'Z' in assignment and assignment['Y'] == assignment['Z']:
+        return False
+    if 'X' in assignment and 'Z' in assignment and assignment['X'] == assignment['Z']:
+        return False
+    return True
+
+print("17️⃣ CSP básico listo, dominios y restricciones definidos")
+
+# Ejemplo de propagación AC-3 (arcos consistentes)
+from collections import deque
+
+def ac3(domains, constraints_func):
+    queue = deque([(Xi, Xj) for Xi in variables for Xj in variables if Xi != Xj])
+
+    while queue:
+        Xi, Xj = queue.popleft()
+        revised = False
+
+        # Revisamos cada valor en el dominio de Xi
+        for x in domains[Xi][:]:
+            # Si no existe algún valor compatible en Xj, eliminamos x
+            if not any(constraints_func({Xi: x, Xj: y}) for y in domains[Xj]):
+                domains[Xi].remove(x)
+                revised = True
+
+        # Si revisamos, añadimos arcos relacionados
+        if revised:
+            for Xk in variables:
+                if Xk != Xi and Xk != Xj:
+                    queue.append((Xk, Xi))
+
+    return domains
+
+domains_copy = {v: domains[v][:] for v in variables}
+domains_ac3 = ac3(domains_copy, constraints)
+print("20️⃣ AC-3 Propagación de Restricciones:", domains_ac3)

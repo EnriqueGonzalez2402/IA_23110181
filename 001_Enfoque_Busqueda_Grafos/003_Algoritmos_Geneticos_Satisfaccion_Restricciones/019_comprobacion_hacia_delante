@@ -1,0 +1,45 @@
+# Ejemplo simple: tres variables X, Y, Z con dominio {1,2,3}
+variables = ['X', 'Y', 'Z']
+domains = {v: [1,2,3] for v in variables}
+
+# Restricciones: X != Y, Y != Z, X != Z
+def constraints(assignment):
+    if 'X' in assignment and 'Y' in assignment and assignment['X'] == assignment['Y']:
+        return False
+    if 'Y' in assignment and 'Z' in assignment and assignment['Y'] == assignment['Z']:
+        return False
+    if 'X' in assignment and 'Z' in assignment and assignment['X'] == assignment['Z']:
+        return False
+    return True
+
+print("17️⃣ CSP básico listo, dominios y restricciones definidos")
+
+def forward_checking(assignment={}):
+    if len(assignment) == len(variables):
+        return assignment
+
+    unassigned = [v for v in variables if v not in assignment]
+    var = unassigned[0]
+
+    for value in domains[var]:
+        local_assignment = assignment.copy()
+        local_assignment[var] = value
+
+        # Revisamos si asignar 'value' deja dominios vacíos para vecinos
+        valid = True
+        for neighbor in unassigned[1:]:
+            neighbor_domain = [val for val in domains[neighbor]
+                               if constraints({**local_assignment, neighbor: val})]
+            if not neighbor_domain:
+                valid = False
+                break
+
+        if valid:
+            result = forward_checking(local_assignment)
+            if result:
+                return result
+
+    return None
+
+solution_fc = forward_checking()
+print("19️⃣ Forward Checking:", solution_fc)
