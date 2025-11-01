@@ -1,0 +1,18 @@
+# Probabilidad a priori basada en datos históricos de 7 días
+# ----------------------------------------
+
+# Datos históricos: True = llovió, False = no llovió
+historial_lluvia = [True, True, False, True, True, False, False]
+
+# Calcular prior
+P_lluvia = sum(historial_lluvia)/len(historial_lluvia)
+P_no_lluvia = 1 - P_lluvia
+
+print(f"Prior estimado de lluvia = {P_lluvia:.2f}")
+print(f"Prior estimado de no lluvia = {P_no_lluvia:.2f}")
+
+# Decisión simple para el día siguiente
+if P_lluvia > 0.5:
+    print("Se recomienda paraguas ☔")
+else:
+    print("No parece que vaya a llover 🌤️")

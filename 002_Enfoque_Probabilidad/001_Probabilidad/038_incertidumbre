@@ -1,0 +1,31 @@
+# Simulación de incertidumbre en un entorno climático más complejo
+# Variables: lluvia, humedad, viento, suelo
+# ----------------------------------------
+
+import itertools
+
+# Estados posibles
+lluvia = [True, False]
+humedad = ['alta', 'media', 'baja']
+viento = ['fuerte', 'moderado', 'calmo']
+suelo_mojado = [True, False]
+
+# Probabilidades a priori (simplificadas)
+P_lluvia = 0.3
+P_humedad_dado_lluvia = {'alta':0.7, 'media':0.2, 'baja':0.1}
+P_humedad_dado_no_lluvia = {'alta':0.1, 'media':0.3, 'baja':0.6}
+P_viento_dado_lluvia = {'fuerte':0.2, 'moderado':0.5, 'calmo':0.3}
+P_viento_dado_no_lluvia = {'fuerte':0.3, 'moderado':0.4, 'calmo':0.3}
+P_suelo_dado_lluvia = 0.9
+P_suelo_dado_no_lluvia = 0.1
+
+# Calculamos probabilidad conjunta de algunos escenarios
+escenarios = list(itertools.product(lluvia, humedad, viento, suelo_mojado))
+
+for e in escenarios:
+    L,H,V,S = e
+    P = (P_lluvia if L else 1-P_lluvia)
+    P *= P_humedad_dado_lluvia[H] if L else P_humedad_dado_no_lluvia[H]
+    P *= P_viento_dado_lluvia[V] if L else P_viento_dado_no_lluvia[V]
+    P *= P_suelo_dado_lluvia if (L and S) or (not L and not S) else (1-P_suelo_dado_lluvia if L else 1-P_suelo_dado_no_lluvia)
+    print(f"Escenario {e}: Probabilidad ≈ {P:.5f}")
