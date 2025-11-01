@@ -1,0 +1,104 @@
+
+import random
+
+# -----------------------
+# Definición del CSP
+# -----------------------
+variables = ['X', 'Y', 'Z']                   # Lista de variables
+domains = {v: [1, 2, 3] for v in variables}    # Dominio de cada variable
+
+def constraints(assignment):
+    """
+    Verifica si una asignación parcial cumple las restricciones:
+    En este ejemplo todas las variables deben ser distintas entre sí.
+    assignment: dict parcial o completo, e.g. {'X':1, 'Y':2}
+    Devuelve True si la asignación NO viola restricciones, False si viola.
+    """
+    # Si X y Y existen y son iguales => viola
+    if 'X' in assignment and 'Y' in assignment and assignment['X'] == assignment['Y']:
+        return False
+    # Si Y y Z existen y son iguales => viola
+    if 'Y' in assignment and 'Z' in assignment and assignment['Y'] == assignment['Z']:
+        return False
+    # Si X y Z existen y son iguales => viola
+    if 'X' in assignment and 'Z' in assignment and assignment['X'] == assignment['Z']:
+        return False
+    # Si no hay violaciones detectadas:
+    return True
+
+print("17️⃣ CSP básico listo, dominios y restricciones definidos")
+
+# -----------------------
+# Algoritmo: Minimos-Conflictos
+# -----------------------
+def min_conflicts(max_steps=1000):
+    """
+    Implementación del algoritmo de mínimos conflictos:
+    1) Inicializar asignación aleatoria (cada variable recibe un valor del dominio)
+    2) Repetir hasta max_steps:
+       a) Si la asignación actual satisface todas las restricciones -> devolverla
+       b) Calcular para cada variable cuántos conflictos genera (número entero)
+       c) Seleccionar una variable con conflicto máximo
+       d) Asignarle el valor del dominio que minimiza los conflictos (rompiendo empates aleatoriamente)
+    3) Si no converge, devuelve la mejor asignación encontrada (o None)
+    """
+    # 1) Inicialización aleatoria
+    assignment = {v: random.choice(domains[v]) for v in variables}
+
+    for step in range(max_steps):
+        # 2a) Si la asignación ya es válida, la devolvemos
+        if constraints(assignment):
+            return assignment
+
+        # 2b) Calculamos número de conflictos **enteros** para cada variable
+        # Definimos "conflicto" como cuántas otras variables tienen el mismo valor.
+        conflicts = {}
+        for v in variables:
+            val_v = assignment[v]
+            # contamos cuántas otras variables tienen el mismo valor que v
+            count = sum(1 for u in variables if u != v and assignment[u] == val_v)
+            conflicts[v] = count
+        # ahora 'conflicts' es un dict: variable -> número de conflictos (int)
+
+        # 2c) Elegimos una variable con el mayor número de conflictos
+        # Si hay empate, max escogerá la primera; para mayor diversidad podemos elegir aleatoriamente entre los máximos
+        max_conflict_val = max(conflicts.values())
+        # lista de variables que comparten el máximo conflicto
+        vars_with_max = [v for v, c in conflicts.items() if c == max_conflict_val]
+        # elegimos aleatoriamente entre ellas para romper empates
+        var_conflict = random.choice(vars_with_max)
+
+        # 2d) Para la variable seleccionada, elegimos el valor del dominio que minimiza conflictos
+        # Calculamos para cada posible valor cuántos conflictos (enteros) habría si lo asignamos
+        best_values = []
+        best_conflict_count = None
+        for val in domains[var_conflict]:
+            # simulamos la asignación temporalmente
+            temp_assignment = assignment.copy()
+            temp_assignment[var_conflict] = val
+            # contamos conflictos que tendría 'var_conflict' con este valor:
+            # número de otras variables que igualan ese valor
+            temp_count = sum(1 for u in variables if u != var_conflict and temp_assignment[u] == val)
+            # guardamos si es mejor
+            if best_conflict_count is None or temp_count < best_conflict_count:
+                best_conflict_count = temp_count
+                best_values = [val]
+            elif temp_count == best_conflict_count:
+                best_values.append(val)
+
+        # elegimos aleatoriamente entre los mejores valores (romper empates)
+        chosen_value = random.choice(best_values)
+        # actualizamos la asignación real
+        assignment[var_conflict] = chosen_value
+
+        # (Opcional) podrías imprimir progreso:
+        # print(f"Step {step}: var {var_conflict} -> {chosen_value}, conflicts={conflicts}")
+
+    # Si no hemos encontrado solución en max_steps, devolvemos la mejor tentativa actual
+    return assignment
+
+# Ejecutar el algoritmo
+solution_mc = min_conflicts()
+print("22️⃣ Mínimos-Conflictos (resultado):", solution_mc)
+# Verificación final: True si solución válida
+print("¿Solución válida?:", constraints(solution_mc))

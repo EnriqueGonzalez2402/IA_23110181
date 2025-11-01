@@ -1,0 +1,38 @@
+# Para CSP simples: branch & bound
+# Ejemplo simple: tres variables X, Y, Z con dominio {1,2,3}
+variables = ['X', 'Y', 'Z']
+domains = {v: [1,2,3] for v in variables}
+
+# Restricciones: X != Y, Y != Z, X != Z
+def constraints(assignment):
+    if 'X' in assignment and 'Y' in assignment and assignment['X'] == assignment['Y']:
+        return False
+    if 'Y' in assignment and 'Z' in assignment and assignment['Y'] == assignment['Z']:
+        return False
+    if 'X' in assignment and 'Z' in assignment and assignment['X'] == assignment['Z']:
+        return False
+    return True
+
+print("17️⃣ CSP básico listo, dominios y restricciones definidos")
+
+def branch_and_bound(assignment={}, best_solution=None):
+    if len(assignment) == len(variables):
+        return assignment
+
+    unassigned = [v for v in variables if v not in assignment]
+    var = unassigned[0]
+
+    for value in domains[var]:
+        local_assignment = assignment.copy()
+        local_assignment[var] = value
+
+        if constraints(local_assignment):
+            # Podríamos evaluar “costo” y cortar ramas que no mejoran
+            result = branch_and_bound(local_assignment, best_solution)
+            if result:
+                best_solution = result
+
+    return best_solution
+
+solution_bb = branch_and_bound()
+print("23️⃣ Branch & Bound:", solution_bb)
