@@ -1,0 +1,20 @@
+# Modelo donde el agente no conoce completamente el estado del entorno,
+# solo tiene una creencia (probabilidad de estar en cada estado).
+
+estados = ['Sano', 'Enfermo']
+creencia = {'Sano': 0.7, 'Enfermo': 0.3}
+
+# Recompensas esperadas por acción
+acciones = {'Descansar': {'Sano': 5, 'Enfermo': 1},
+             'Trabajar': {'Sano': 10, 'Enfermo': -5}}
+
+# Elegimos acción con mayor utilidad esperada
+def utilidad_esperada(creencia, accion):
+    return sum(creencia[s] * acciones[accion][s] for s in estados)
+
+mejor_accion = max(acciones, key=lambda a: utilidad_esperada(creencia, a))
+
+print("30️⃣ POMDP:")
+for a in acciones:
+    print(f"Acción {a}: Utilidad esperada = {utilidad_esperada(creencia, a):.2f}")
+print(f"👉 Mejor acción: {mejor_accion}")

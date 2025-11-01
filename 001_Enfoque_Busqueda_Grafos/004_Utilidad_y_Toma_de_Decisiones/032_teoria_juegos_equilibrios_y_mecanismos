@@ -1,0 +1,20 @@
+# Modela interacciones entre agentes racionales (jugadores).
+
+# Ejemplo clásico: Dilema del Prisionero
+# Matriz de pagos (Jugador1, Jugador2)
+payoffs = {
+    ('Cooperar', 'Cooperar'): (3, 3),
+    ('Cooperar', 'Traicionar'): (0, 5),
+    ('Traicionar', 'Cooperar'): (5, 0),
+    ('Traicionar', 'Traicionar'): (1, 1)
+}
+
+# Evaluamos posibles resultados
+acciones = ['Cooperar', 'Traicionar']
+
+print("32️⃣ Teoría de Juegos:")
+for a1 in acciones:
+    for a2 in acciones:
+        print(f"Jugador1={a1}, Jugador2={a2} → Recompensas={payoffs[(a1,a2)]}")
+
+print("👉 Equilibrio de Nash: (Traicionar, Traicionar) ya que ninguno mejora unilaterlamente.")

@@ -1,0 +1,12 @@
+# Extiende una red bayesiana en el tiempo (modelo temporal probabilístico).
+
+# Ejemplo: clima en dos días consecutivos
+prob_sol_dia1 = 0.6
+prob_sol_dia2_dado_sol = 0.8
+prob_sol_dia2_dado_lluvia = 0.3
+
+# Probabilidad total de que el día 2 sea soleado
+prob_sol_dia2 = prob_sol_dia1 * prob_sol_dia2_dado_sol + (1 - prob_sol_dia1) * prob_sol_dia2_dado_lluvia
+
+print("31️⃣ Red Bayesiana Dinámica:")
+print(f"P(Soleado día 2) = {prob_sol_dia2:.2f}")
