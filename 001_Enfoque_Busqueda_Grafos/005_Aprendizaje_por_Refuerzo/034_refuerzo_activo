@@ -1,0 +1,41 @@
+import random
+
+# El agente explora y actualiza tanto su política como el valor de cada estado.
+# 'G' = meta, 'P' = pozo (mala recompensa), ' ' = estado normal
+entorno = [
+    [' ', ' ', 'G'],
+    [' ', 'P', ' '],
+    [' ', ' ', ' ']
+]
+acciones = [(0,1), (1,0), (-1,0), (0,-1)]  # derecha, abajo, arriba, izquierda
+recompensas = {'G': 10, 'P': -10, ' ': -1}
+
+def mover(pos, accion):
+    x, y = pos
+    nx, ny = x + accion[0], y + accion[1]
+    if 0 <= nx < 3 and 0 <= ny < 3:
+        return (nx, ny)
+    return pos  # si choca, se queda
+
+Q = {(i, j, a): 0 for i in range(3) for j in range(3) for a in acciones}
+alpha = 0.1  # tasa de aprendizaje
+gamma = 0.9  # descuento futuro
+
+for episodio in range(100):
+    pos = (0, 0)
+    for paso in range(10):
+        # Selecciona acción aleatoria (exploración)
+        accion = random.choice(acciones)
+        siguiente = mover(pos, accion)
+        tipo = entorno[siguiente[0]][siguiente[1]]
+        recompensa = recompensas[tipo]
+
+        # Actualiza valor Q
+        max_Q_siguiente = max(Q[(siguiente[0], siguiente[1], a)] for a in acciones)
+        Q[(pos[0], pos[1], accion)] += alpha * (recompensa + gamma * max_Q_siguiente - Q[(pos[0], pos[1], accion)])
+        pos = siguiente
+
+print("34️⃣ Aprendizaje por Refuerzo Activo (valores Q):")
+for k, v in Q.items():
+    if abs(v) > 0.01:
+        print(f"Estado {k[:2]}, Acción {k[2]} → Valor Q = {v:.2f}")

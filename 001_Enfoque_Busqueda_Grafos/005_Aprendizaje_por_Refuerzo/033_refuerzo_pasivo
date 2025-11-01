@@ -1,0 +1,43 @@
+import random
+
+# --- BLOQUE E33: APRENDIZAJE POR REFUERZO PASIVO ---
+# El agente observa experiencias y estima el valor de los estados (sin decidir acciones).
+
+# Definimos un entorno simple tipo grid (3x3)
+# 'G' = meta, 'P' = pozo (mala recompensa), ' ' = estado normal
+entorno = [
+    [' ', ' ', 'G'],
+    [' ', 'P', ' '],
+    [' ', ' ', ' ']
+]
+
+# Recompensas por tipo de casilla
+recompensas = {'G': 10, 'P': -10, ' ': -1}
+
+# Política fija: siempre moverse hacia la derecha si puede, sino hacia abajo
+def politica_fija(pos):
+    x, y = pos
+    if y < 2:
+        return (x, y + 1)
+    elif x < 2:
+        return (x + 1, y)
+    return (x, y)
+
+# Inicializamos los valores de estado
+valores_estado = {(i, j): 0 for i in range(3) for j in range(3)}
+
+# Episodios de entrenamiento (simulaciones)
+for episodio in range(50):
+    pos = (0, 0)
+    total = 0
+    for paso in range(5):
+        tipo = entorno[pos[0]][pos[1]]
+        recompensa = recompensas[tipo]
+        total += recompensa
+        siguiente = politica_fija(pos)
+        valores_estado[pos] += 0.1 * (recompensa + valores_estado[siguiente] - valores_estado[pos])
+        pos = siguiente
+
+print("33️⃣ Aprendizaje por Refuerzo Pasivo:")
+for k, v in valores_estado.items():
+    print(f"Estado {k}: Valor estimado = {v:.2f}")
