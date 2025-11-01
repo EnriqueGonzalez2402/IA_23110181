@@ -1,0 +1,27 @@
+# Simulación de un proceso de Markov simple
+# ----------------------------------------
+import random
+
+# Estados posibles
+estados = ["soleado", "nublado", "lluvioso"]
+
+# Matriz de transición
+transicion = {
+    'soleado': {'soleado':0.6, 'nublado':0.3, 'lluvioso':0.1},
+    'nublado': {'soleado':0.3, 'nublado':0.4, 'lluvioso':0.3},
+    'lluvioso': {'soleado':0.2, 'nublado':0.3, 'lluvioso':0.5}
+}
+
+# Inicializamos
+estado_actual = "soleado"
+historial = [estado_actual]
+
+# Simulamos 20 pasos
+for _ in range(20):
+    prob = list(transicion[estado_actual].values())
+    estados_posibles = list(transicion[estado_actual].keys())
+    # Seleccionamos el siguiente estado solo basado en el estado actual
+    estado_actual = random.choices(estados_posibles, prob)[0]
+    historial.append(estado_actual)
+
+print("Historial del proceso de Markov:", historial)

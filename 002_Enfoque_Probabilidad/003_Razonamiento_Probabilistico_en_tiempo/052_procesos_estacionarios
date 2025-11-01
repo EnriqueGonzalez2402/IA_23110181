@@ -1,0 +1,27 @@
+# Simulación de un proceso estacionario: ruido gaussiano
+# ----------------------------------------
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(0)  # Para reproducibilidad
+
+# Generamos 1000 muestras de ruido gaussiano con media 0 y varianza 1
+N = 1000
+media = 0
+varianza = 1
+ruido = np.random.normal(media, np.sqrt(varianza), N)
+
+# Calculamos media y varianza empírica
+media_emp = np.mean(ruido)
+var_emp = np.var(ruido)
+
+print(f"Media empírica: {media_emp:.3f}, Varianza empírica: {var_emp:.3f}")
+
+# Graficamos el proceso
+plt.figure(figsize=(10,4))
+plt.plot(ruido, label="Proceso estacionario (ruido gaussiano)")
+plt.xlabel("Tiempo")
+plt.ylabel("Valor")
+plt.legend()
+plt.title("Simulación de Proceso Estacionario")
+plt.show()
