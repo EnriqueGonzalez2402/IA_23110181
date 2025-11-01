@@ -1,0 +1,17 @@
+# Método para resolver un Proceso de Decisión de Markov (MDP)
+# calculando los valores de utilidad esperada de cada estado.
+
+estados = ['A', 'B']
+recompensas = {'A': 5, 'B': 10}
+transiciones = {'A': {'A': 0.7, 'B': 0.3}, 'B': {'A': 0.4, 'B': 0.6}}
+gamma = 0.9  # factor de descuento
+U = {'A': 0, 'B': 0}
+
+for _ in range(10):  # 10 iteraciones
+    nuevo_U = {}
+    for s in estados:
+        nuevo_U[s] = recompensas[s] + gamma * sum(transiciones[s][s2]*U[s2] for s2 in estados)
+    U = nuevo_U
+
+print("27️⃣ Iteración de Valores:")
+print(U)

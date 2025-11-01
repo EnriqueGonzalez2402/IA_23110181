@@ -1,0 +1,19 @@
+# Método alternativo para resolver MDP: ajusta políticas en lugar de valores.
+
+estados = ['A', 'B']
+acciones = ['irA', 'irB']
+recompensas = {'A': 5, 'B': 10}
+politica = {'A': 'irB', 'B': 'irA'}
+
+def evaluar_politica(politica):
+    valores = {'A': 0, 'B': 0}
+    for _ in range(10):
+        for s in estados:
+            destino = 'B' if politica[s] == 'irB' else 'A'
+            valores[s] = recompensas[s] + 0.9 * valores[destino]
+    return valores
+
+valores = evaluar_politica(politica)
+print("28️⃣ Iteración de Políticas:")
+print("Política actual:", politica)
+print("Valores:", valores)

@@ -1,0 +1,17 @@
+# Define un MDP simple con estados, acciones, transiciones y recompensas.
+
+estados = ['Soleado', 'Lluvioso']
+acciones = ['Pasear', 'Leer']
+recompensas = {('Soleado', 'Pasear'): 10,
+               ('Soleado', 'Leer'): 4,
+               ('Lluvioso', 'Pasear'): 0,
+               ('Lluvioso', 'Leer'): 8}
+
+# Política simple: si llueve, leer; si no, pasear.
+politica = {'Soleado': 'Pasear', 'Lluvioso': 'Leer'}
+
+U = {s: recompensas[(s, politica[s])] for s in estados}
+
+print("29️⃣ MDP:")
+for s in estados:
+    print(f"En estado '{s}', acción '{politica[s]}' → recompensa {U[s]}")
