@@ -1,0 +1,45 @@
+import numpy as np
+import random
+
+#es uno de los métodos más usados: el agente aprende una tabla Q(s,a) que representa el valor esperado de tomar acción a en estado s
+
+# Ejemplo en un entorno de cuadrícula 4x4, con meta y obstáculo.
+
+entorno = np.array([
+    [' ', ' ', ' ', 'G'],
+    [' ', 'P', ' ', ' '],
+    [' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ']
+])
+
+recompensas = {'G': 10, 'P': -10, ' ': -1}
+acciones = [(0,1), (1,0), (-1,0), (0,-1)]
+Q = np.zeros((4,4,len(acciones)))
+
+alpha = 0.1
+gamma = 0.9
+episodios = 200
+
+def mover(pos, accion):
+    x, y = pos
+    nx, ny = x + accion[0], y + accion[1]
+    if 0 <= nx < 4 and 0 <= ny < 4:
+        return (nx, ny)
+    return pos
+
+for _ in range(episodios):
+    pos = (3,0)
+    for paso in range(20):
+        a = random.randint(0,3)
+        accion = acciones[a]
+        nuevo = mover(pos, accion)
+        tipo = entorno[nuevo[0]][nuevo[1]]
+        r = recompensas[tipo]
+
+        Q[pos[0], pos[1], a] = Q[pos[0], pos[1], a] + alpha * (r + gamma * np.max(Q[nuevo[0], nuevo[1], :]) - Q[pos[0], pos[1], a])
+        pos = nuevo
+
+print("35️⃣ Q-Learning - Tabla Q resultante (resumen):")
+for i in range(4):
+    for j in range(4):
+        print(f"Pos({i},{j}): {np.max(Q[i,j,:]):.2f}")

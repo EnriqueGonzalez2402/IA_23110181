@@ -1,6 +1,5 @@
 import random
 
-# --- BLOQUE E33: APRENDIZAJE POR REFUERZO PASIVO ---
 # El agente observa experiencias y estima el valor de los estados (sin decidir acciones).
 
 # Definimos un entorno simple tipo grid (3x3)

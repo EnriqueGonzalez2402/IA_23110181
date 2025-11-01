@@ -1,0 +1,59 @@
+import random
+import numpy as np
+
+# Ejemplo del mismo entorno con política ε-greedy.
+entorno = np.array([
+    [' ', ' ', ' ', 'G'],
+    [' ', 'P', ' ', ' '],
+    [' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ']
+])
+recompensas = {'G': 10, 'P': -10, ' ': -1}
+epsilon = 0.2  # 20% de exploración
+alpha = 0.1
+gamma = 0.9
+acciones = [(0,1), (1,0), (-1,0), (0,-1)]
+episodios = 200
+
+Q = np.zeros((4,4,len(acciones)))
+def mover(pos, accion):
+    x, y = pos
+    nx, ny = x + accion[0], y + accion[1]
+    if 0 <= nx < 4 and 0 <= ny < 4:
+        return (nx, ny)
+    return pos
+
+for _ in range(episodios):
+    pos = (3,0)
+    for paso in range(20):
+        a = random.randint(0,3)
+        accion = acciones[a]
+        nuevo = mover(pos, accion)
+        tipo = entorno[nuevo[0]][nuevo[1]]
+        r = recompensas[tipo]
+
+        Q[pos[0], pos[1], a] = Q[pos[0], pos[1], a] + alpha * (r + gamma * np.max(Q[nuevo[0], nuevo[1], :]) - Q[pos[0], pos[1], a])
+        pos = nuevo
+
+for _ in range(200):
+    pos = (3,0)
+    for paso in range(20):
+        # Política ε-greedy
+        if random.random() < epsilon:
+            a = random.randint(0,3)  # explora
+        else:
+            a = np.argmax(Q[pos[0], pos[1], :])  # explota
+        accion = acciones[a]
+
+        nuevo = mover(pos, accion)
+        tipo = entorno[nuevo[0]][nuevo[1]]
+        r = recompensas[tipo]
+
+        Q[pos[0], pos[1], a] += alpha * (r + gamma * np.max(Q[nuevo[0], nuevo[1], :]) - Q[pos[0], pos[1], a])
+        pos = nuevo
+
+print("36️⃣ Política ε-Greedy aplicada:")
+for i in range(4):
+    for j in range(4):
+        mejor_a = np.argmax(Q[i,j,:])
+        print(f"Pos({i},{j}) → Mejor acción: {acciones[mejor_a]}, Valor: {np.max(Q[i,j,:]):.2f}")

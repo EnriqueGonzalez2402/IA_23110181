@@ -1,0 +1,45 @@
+import numpy as np
+import random
+# Intentamos encontrar la política que maximiza la recompensa promedio.
+entorno = np.array([
+    [' ', ' ', ' ', 'G'],
+    [' ', 'P', ' ', ' '],
+    [' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ']
+])
+# Definimos dos políticas iniciales aleatorias
+recompensas = {'G': 10, 'P': -10, ' ': -1}
+acciones = [(0,1), (1,0), (-1,0), (0,-1)]
+politicas = [
+    {(i,j): random.choice(acciones) for i in range(4) for j in range(4)},
+    {(i,j): random.choice(acciones) for i in range(4) for j in range(4)}
+]
+
+def mover(pos, accion):
+    x, y = pos
+    nx, ny = x + accion[0], y + accion[1]
+    if 0 <= nx < 4 and 0 <= ny < 4:
+        return (nx, ny)
+    return pos
+
+def evaluar_politica(politica):
+    total = 0
+    for episodio in range(20):
+        pos = (3,0)
+        for paso in range(10):
+            accion = politica[pos]
+            pos = mover(pos, accion)
+            tipo = entorno[pos[0]][pos[1]]
+            total += recompensas[tipo]
+            if tipo == 'G':  # si llega a meta, termina
+                break
+    return total / 20  # promedio
+
+# Evaluamos y seleccionamos la mejor
+resultados = [evaluar_politica(p) for p in politicas]
+mejor = np.argmax(resultados)
+
+print("37️⃣ Búsqueda de la Política:")
+for i, r in enumerate(resultados):
+    print(f"Política {i+1} → Recompensa promedio: {r:.2f}")
+print(f"👉 Mejor política: {mejor+1}")
