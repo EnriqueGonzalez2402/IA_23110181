@@ -1,0 +1,28 @@
+# Independencia condicional con 4 variables
+# ----------------------------------------
+
+# Variables: lluvia (L), suelo (S), nubes (N), paraguas (P)
+# Suposiciones simplificadas:
+# P(Lluvia) = 0.3
+# P(Nubes|Lluvia) = 0.8 si Lluvia=True, 0.2 si Lluvia=False
+# P(Suelo|Lluvia) = 0.9 si Lluvia=True, 0.1 si Lluvia=False
+# P(Paraguas|Nubes) = 0.7 si Nubes=True, 0.1 si Nubes=False
+
+P_L = 0.3
+P_N_dado_L = {True:0.8, False:0.2}
+P_S_dado_L = {True:0.9, False:0.1}
+P_P_dado_N = {True:0.7, False:0.1}
+
+# Queremos P(L, S, N, P)
+# Si usamos independencia condicional: 
+# P(L,S,N,P) = P(L) * P(N|L) * P(S|L) * P(P|N)
+
+for L in [True, False]:
+    for N in [True, False]:
+        for S in [True, False]:
+            for P in [True, False]:
+                prob = P_L if L else 1-P_L
+                prob *= P_N_dado_L[L] if N else 1-P_N_dado_L[L]
+                prob *= P_S_dado_L[L] if S else 1-P_S_dado_L[L]
+                prob *= P_P_dado_N[N] if P else 1-P_P_dado_N[N]
+                print(f"L={L}, S={S}, N={N}, P={P} => P={prob:.5f}")

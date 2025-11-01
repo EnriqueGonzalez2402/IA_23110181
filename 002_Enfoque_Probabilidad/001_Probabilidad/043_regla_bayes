@@ -1,0 +1,43 @@
+# Regla de Bayes con múltiples enfermedades y tests
+# ----------------------------------------
+
+enfermedades = ['Gripe', 'Resfriado', 'COVID']
+tests = ['Fiebre', 'Tos', 'DolorCabeza', 'Cansancio']
+
+# Priori de cada enfermedad
+P_prior = {'Gripe':0.2, 'Resfriado':0.5, 'COVID':0.1}
+
+# Probabilidades condicionales: P(test positivo | enfermedad)
+P_test_dado_enf = {
+    'Gripe': {'Fiebre':0.8,'Tos':0.6,'DolorCabeza':0.7,'Cansancio':0.5},
+    'Resfriado': {'Fiebre':0.3,'Tos':0.8,'DolorCabeza':0.2,'Cansancio':0.4},
+    'COVID': {'Fiebre':0.9,'Tos':0.7,'DolorCabeza':0.6,'Cansancio':0.8}
+}
+
+# Resultados observados de los tests
+observados = {'Fiebre':True, 'Tos':True, 'DolorCabeza':False, 'Cansancio':True}
+
+# Calculamos probabilidades sin normalizar
+P_sin_norm = {}
+for enf in enfermedades:
+    p = P_prior[enf]
+    for t, val in observados.items():
+        prob_t = P_test_dado_enf[enf][t]
+        p *= prob_t if val else (1-prob_t)
+    P_sin_norm[enf] = p
+
+# Normalización
+total = sum(P_sin_norm.values())
+P_post = {enf: P_sin_norm[enf]/total for enf in enfermedades}
+
+print("Probabilidades posteriori dadas los tests observados:")
+for enf, p in P_post.items():
+    print(f"{enf}: {p:.3f}")
+
+# Visualización
+import matplotlib.pyplot as plt
+
+plt.bar(P_post.keys(), P_post.values(), color=['blue','green','red'])
+plt.ylabel("Probabilidad posterior")
+plt.title("Probabilidades posteriores de enfermedades según tests")
+plt.show()
