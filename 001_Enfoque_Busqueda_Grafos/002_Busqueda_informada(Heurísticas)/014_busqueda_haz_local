@@ -1,0 +1,43 @@
+# Grafo: nodos y sus vecinos
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
+
+# Heurística: estimación de la distancia restante al objetivo F
+heuristic = {
+    'A': 6,
+    'B': 4,
+    'C': 2,
+    'D': 7,
+    'E': 1,
+    'F': 0
+}
+
+start = 'A'
+goal = 'F'
+
+def local_beam_search(graph, start, goal, heuristic, k=2):
+    states = [[start]]  # Comenzamos con un conjunto de caminos
+
+    while True:
+        new_states = []
+        for path in states:
+            node = path[-1]
+            if node == goal:
+                return path
+            for neighbor in graph[node]:
+                new_states.append(path + [neighbor])
+
+        if not new_states:
+            return None
+
+        # Seleccionamos solo las k mejores rutas según heurística
+        states = sorted(new_states, key=lambda p: heuristic[p[-1]])[:k]
+
+path_beam = local_beam_search(graph, start, goal, heuristic)
+print("1️⃣4️⃣ Haz Local:", path_beam)
