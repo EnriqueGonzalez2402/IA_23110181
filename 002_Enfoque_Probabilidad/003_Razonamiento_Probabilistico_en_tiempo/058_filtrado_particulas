@@ -1,0 +1,40 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(0)
+
+T = 50
+x_true = np.linspace(0, 49, T)
+y = x_true + np.random.normal(0, 2, T)  # mediciones ruidosas
+
+# Número de partículas
+N_particles = 1000
+particles = np.random.uniform(0, 50, N_particles)  # posiciones iniciales
+weights = np.ones(N_particles) / N_particles
+
+x_est = []
+
+for t in range(T):
+    # Predicción: movemos partículas según modelo
+    particles += 1 + np.random.normal(0, 0.5, N_particles)
+
+    # Actualización de pesos según medición
+    weights = (1/np.sqrt(2*np.pi*2**2)) * np.exp(-0.5*((y[t]-particles)/2)**2)
+    weights /= np.sum(weights)
+
+    # Estimación ponderada
+    x_est.append(np.sum(particles*weights))
+
+    # Re-muestreo de partículas
+    indices = np.random.choice(range(N_particles), size=N_particles, p=weights)
+    particles = particles[indices]
+    weights = np.ones(N_particles)/N_particles
+
+# Graficamos
+plt.figure(figsize=(10,5))
+plt.plot(x_true, label="Posición verdadera")
+plt.plot(y, label="Mediciones ruidosas", alpha=0.5)
+plt.plot(x_est, label="Estimación por partículas")
+plt.legend()
+plt.title("Filtrado por Partículas")
+plt.show()
