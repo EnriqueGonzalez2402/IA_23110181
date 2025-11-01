@@ -1,0 +1,33 @@
+# Distribución de probabilidad para la suma de dos dados
+# ----------------------------------------
+
+import itertools
+import matplotlib.pyplot as plt
+
+# Posibles resultados de cada dado
+dado = [1, 2, 3, 4, 5, 6]
+
+# Todas las combinaciones posibles de dos dados
+combinaciones = list(itertools.product(dado, dado))
+
+# Contar la frecuencia de cada suma
+frecuencia_suma = {}
+for (d1, d2) in combinaciones:
+    suma = d1 + d2
+    frecuencia_suma[suma] = frecuencia_suma.get(suma, 0) + 1
+
+# Calcular probabilidades
+total_combinaciones = len(combinaciones)
+prob_suma = {k: v/total_combinaciones for k, v in frecuencia_suma.items()}
+
+# Mostrar resultados
+print("Distribución de probabilidad para la suma de dos dados:")
+for s, p in prob_suma.items():
+    print(f"Suma {s}: P = {p:.3f}")
+
+# Graficar la distribución
+plt.bar(prob_suma.keys(), prob_suma.values())
+plt.xlabel("Suma de los dados")
+plt.ylabel("Probabilidad")
+plt.title("Distribución de probabilidad de la suma de dos dados")
+plt.show()

@@ -1,0 +1,33 @@
+# Sistema de diagnóstico con varios síntomas
+# ----------------------------------------
+
+enfermedades = ['Gripe', 'Resfriado', 'COVID']
+P_prior = {'Gripe':0.2, 'Resfriado':0.5, 'COVID':0.1}
+sintomas = ['Fiebre', 'Tos', 'DolorCabeza']
+
+# Probabilidades condicionales: P(síntoma|enfermedad)
+P_sintoma_dado_enf = {
+    'Gripe': {'Fiebre':0.8,'Tos':0.6,'DolorCabeza':0.7},
+    'Resfriado': {'Fiebre':0.3,'Tos':0.8,'DolorCabeza':0.2},
+    'COVID': {'Fiebre':0.9,'Tos':0.7,'DolorCabeza':0.6}
+}
+
+# Síntomas observados
+observados = {'Fiebre':True, 'Tos':True, 'DolorCabeza':False}
+
+# Calcular probabilidad sin normalizar
+P_sin_norm = {}
+for enf in enfermedades:
+    p = P_prior[enf]
+    for s, val in observados.items():
+        prob_s = P_sintoma_dado_enf[enf][s]
+        p *= prob_s if val else (1-prob_s)
+    P_sin_norm[enf] = p
+
+# Normalización
+total = sum(P_sin_norm.values())
+P_post = {enf: P_sin_norm[enf]/total for enf in enfermedades}
+
+print("Probabilidades posteriores dadas los síntomas:")
+for enf, p in P_post.items():
+    print(f"{enf}: {p:.3f}")
