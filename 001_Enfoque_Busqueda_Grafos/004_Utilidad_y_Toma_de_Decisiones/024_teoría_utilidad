@@ -1,9 +1,5 @@
 import math
 
-# --- BLOQUE D24: FUNCIÓN DE UTILIDAD ---
-# La teoría de la utilidad busca modelar cómo un agente racional elige
-# entre opciones con diferentes niveles de riesgo o ganancia esperada.
-
 # Ejemplo: tres posibles ganancias monetarias
 opciones = [50, 100, 200]  # pesos
 

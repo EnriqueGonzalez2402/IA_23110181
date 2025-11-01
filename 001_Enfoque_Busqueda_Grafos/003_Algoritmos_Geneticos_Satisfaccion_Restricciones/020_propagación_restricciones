@@ -1,3 +1,5 @@
+from collections import deque
+
 # Ejemplo simple: tres variables X, Y, Z con dominio {1,2,3}
 variables = ['X', 'Y', 'Z']
 domains = {v: [1,2,3] for v in variables}
@@ -15,7 +17,6 @@ def constraints(assignment):
 print("17️⃣ CSP básico listo, dominios y restricciones definidos")
 
 # Ejemplo de propagación AC-3 (arcos consistentes)
-from collections import deque
 
 def ac3(domains, constraints_func):
     queue = deque([(Xi, Xj) for Xi in variables for Xj in variables if Xi != Xj])
