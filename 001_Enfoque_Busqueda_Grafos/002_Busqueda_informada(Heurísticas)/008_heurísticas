@@ -1,0 +1,20 @@
+
+
+# Heurística: estimación de la distancia restante al objetivo F
+heuristic = {
+    'A': 6,
+    'B': 4,
+    'C': 2,
+    'D': 7,
+    'E': 1,
+    'F': 0
+}
+
+start = 'A'
+goal = 'F'
+
+# Mostrar la heurística de cada nodo
+print("8️⃣ Heurísticas de los nodos:")
+for node in heuristic:
+    # Mostramos estimación de distancia al objetivo F
+    print(f"Nodo {node}: h({node}) = {heuristic[node]}")
