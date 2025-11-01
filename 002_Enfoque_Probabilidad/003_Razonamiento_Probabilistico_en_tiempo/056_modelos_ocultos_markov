@@ -1,0 +1,55 @@
+import numpy as np
+
+# Estados ocultos (clima)
+estados = ['soleado', 'nublado', 'lluvioso']
+N = len(estados)
+
+# Observaciones (actividad de una persona)
+observaciones = ['caminar', 'leer', 'ver_tv']
+M = len(observaciones)
+
+# Secuencia de observaciones (lo que vemos)
+seq_obs = ['caminar', 'leer', 'caminar', 'ver_tv', 'leer', 'caminar']
+
+# Probabilidades iniciales
+pi = np.array([0.5, 0.3, 0.2])
+
+# Matriz de transición entre estados
+A = np.array([[0.6, 0.3, 0.1],
+              [0.3, 0.4, 0.3],
+              [0.2, 0.3, 0.5]])
+
+# Matriz de emisión: P(observación|estado)
+B = np.array([[0.7, 0.2, 0.1],   # soleado
+              [0.2, 0.5, 0.3],   # nublado
+              [0.1, 0.3, 0.6]])  # lluvioso
+
+T_len = len(seq_obs)
+alpha = np.zeros((T_len, N))
+beta = np.zeros((T_len, N))
+
+# -------------------------
+# Algoritmo Adelante (Forward)
+# -------------------------
+alpha[0, :] = pi * B[:, observaciones.index(seq_obs[0])]
+for t in range(1, T_len):
+    for j in range(N):
+        alpha[t, j] = B[j, observaciones.index(seq_obs[t])] * np.sum(alpha[t-1, :] * A[:, j])
+
+# -------------------------
+# Algoritmo Atrás (Backward)
+# -------------------------
+beta[-1, :] = 1
+for t in reversed(range(T_len - 1)):
+    for i in range(N):
+        beta[t, i] = np.sum(A[i, :] * B[:, observaciones.index(seq_obs[t+1])] * beta[t+1, :])
+
+# -------------------------
+# Posterior: P(estado oculto | observaciones)
+# -------------------------
+posterior = alpha * beta
+posterior /= posterior.sum(axis=1, keepdims=True)
+
+print("Posterior de estados ocultos en cada tiempo:")
+for t, p in enumerate(posterior):
+    print(f"Tiempo {t+1} ({seq_obs[t]}): {dict(zip(estados, p.round(3)))}")
