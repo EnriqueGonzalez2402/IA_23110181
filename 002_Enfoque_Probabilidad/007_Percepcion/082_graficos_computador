@@ -1,0 +1,71 @@
+# Ejemplo: operaciones básicas de computación gráfica sobre una imagen:
+# - Dibujar primitivas (líneas, rectángulos, círculos)
+# - Transformaciones afines (traslación, rotación, escala)
+# - Transformación proyectiva (homografía) básica
+# - Guardado y visualización
+# Requisitos: opencv-python, numpy, matplotlib
+# ------------------------------------------------------------
+
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ------------------------------------------------------------
+# 1) Crear una "lona" en blanco (imagen RGB)
+# ------------------------------------------------------------
+canvas = np.ones((400, 600, 3), dtype=np.uint8) * 255  # 400x600 pixels, fondo blanco
+
+# ------------------------------------------------------------
+# 2) Dibujar primitivas
+# ------------------------------------------------------------
+# línea (pt1, pt2, color(BGR), grosor)
+cv2.line(canvas, (50, 50), (550, 50), (255, 0, 0), 3)   # borde superior azul
+# rectángulo (esquina superior izquierda, esquina inferior derecha)
+cv2.rectangle(canvas, (50, 80), (200, 220), (0, 255, 0), 2)  # rectángulo verde
+# círculo (centro, radio)
+cv2.circle(canvas, (350, 150), 60, (0, 0, 255), -1)  # círculo rojo relleno
+# texto
+cv2.putText(canvas, "Grafica Basica", (40, 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 2)
+
+# ------------------------------------------------------------
+# 3) Transformaciones afines: traslacion, rotacion y escala
+# ------------------------------------------------------------
+h, w = canvas.shape[:2]
+# matriz de traslación: mover  dx=50, dy=120
+M_trans = np.array([[1, 0, 50],
+                    [0, 1, 120]], dtype=np.float32)
+translated = cv2.warpAffine(canvas, M_trans, (w, h))
+
+# rotación alrededor del centro (ángulo en grados, escala)
+center = (w//2, h//2)
+M_rot = cv2.getRotationMatrix2D(center, angle=25, scale=0.9)
+rotated = cv2.warpAffine(canvas, M_rot, (w, h))
+
+# ------------------------------------------------------------
+# 4) Homografía (transformación proyectiva)
+#    Tomamos 4 puntos en la imagen y los "mapeamos" a un rectángulo
+# ------------------------------------------------------------
+# puntos de origen (en la imagen original)
+src_pts = np.float32([[50,80], [200,80], [200,220], [50,220]])
+# puntos destino (un rectángulo más grande)
+dst_pts = np.float32([[300,50], [520,60], [500,250], [280,230]])
+H, _ = cv2.findHomography(src_pts, dst_pts)
+warped = cv2.warpPerspective(canvas, H, (w, h))
+
+# ------------------------------------------------------------
+# 5) Mostrar resultados con matplotlib (BGR -> RGB para plt)
+# ------------------------------------------------------------
+def bgr2rgb(img): return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+plt.figure(figsize=(12,8))
+plt.subplot(2,2,1); plt.title("Original"); plt.imshow(bgr2rgb(canvas)); plt.axis('off')
+plt.subplot(2,2,2); plt.title("Trasladado"); plt.imshow(bgr2rgb(translated)); plt.axis('off')
+plt.subplot(2,2,3); plt.title("Rotado"); plt.imshow(bgr2rgb(rotated)); plt.axis('off')
+plt.subplot(2,2,4); plt.title("Homografía aplicada"); plt.imshow(bgr2rgb(warped)); plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+# ------------------------------------------------------------
+# 6) Guardar ejemplo final
+# ------------------------------------------------------------
+cv2.imwrite("082_graficos_demo.png", canvas)

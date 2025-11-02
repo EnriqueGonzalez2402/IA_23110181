@@ -1,0 +1,48 @@
+# Ejemplo de preprocesado sobre una imagen:
+# - lectura, conversión a gris
+# - filtros: Gaussian, median, bilateral
+# - ecualización de histograma y normalización
+# ------------------------------------------------------------
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Carga: usa tu imagen local (cambia la ruta si hace falta)
+img = cv2.imread("input.jpg")  # pon una imagen 'input.jpg' en la carpeta o cambia el nombre
+if img is None:
+    # si no existe, generamos una imagen sintética con ruido
+    img = np.ones((300,400,3), dtype=np.uint8) * 120
+    cv2.circle(img, (200,150), 80, (30,120,200), -1)
+    img = cv2.GaussianBlur(img, (5,5), 0)
+    noise = np.random.normal(0, 20, img.shape).astype(np.int16)
+    img = np.clip(img.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+
+# Convertir a escala de grises
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Filtro Gaussiano (suaviza ruido gaussiano)
+gauss = cv2.GaussianBlur(gray, (7,7), sigmaX=1.5)
+
+# Filtro de mediana (muy bueno para ruido impulsivo 'salt-and-pepper')
+median = cv2.medianBlur(gray, 5)
+
+# Filtro bilateral (suaviza pero preserva bordes)
+bilat = cv2.bilateralFilter(img, d=9, sigmaColor=75, sigmaSpace=75)
+bilat_gray = cv2.cvtColor(bilat, cv2.COLOR_BGR2GRAY)
+
+# Ecualización de histograma (mejora contraste)
+equalized = cv2.equalizeHist(gray)
+
+# Normalización [0,1] como flotantes (útil para modelos ML)
+norm = cv2.normalize(gray.astype(np.float32), None, alpha=0.0, beta=1.0, norm_type=cv2.NORM_MINMAX)
+
+# Mostrar resultados
+plt.figure(figsize=(12,8))
+plt.subplot(2,3,1); plt.title("Original"); plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)); plt.axis('off')
+plt.subplot(2,3,2); plt.title("Gris"); plt.imshow(gray, cmap='gray'); plt.axis('off')
+plt.subplot(2,3,3); plt.title("Gauss"); plt.imshow(gauss, cmap='gray'); plt.axis('off')
+plt.subplot(2,3,4); plt.title("Mediana"); plt.imshow(median, cmap='gray'); plt.axis('off')
+plt.subplot(2,3,5); plt.title("Bilateral (RGB)"); plt.imshow(cv2.cvtColor(bilat, cv2.COLOR_BGR2RGB)); plt.axis('off')
+plt.subplot(2,3,6); plt.title("Ecualizado"); plt.imshow(equalized, cmap='gray'); plt.axis('off')
+plt.tight_layout()
+plt.show()
