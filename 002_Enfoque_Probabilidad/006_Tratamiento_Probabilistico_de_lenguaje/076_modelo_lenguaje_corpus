@@ -1,0 +1,36 @@
+
+from collections import defaultdict
+import random
+
+# Corpus simple (puedes usar uno más grande si quieres)
+corpus = [
+    "el perro corre rapido",
+    "el gato duerme tranquilo",
+    "el perro ladra fuerte",
+    "el gato maulla suave"
+]
+
+# Paso 1️⃣: Tokenizar oraciones en palabras
+tokens = []
+for frase in corpus:
+    tokens.extend(frase.split())
+
+# Paso 2️⃣: Calcular frecuencia de unigramas
+freq = defaultdict(int)
+for palabra in tokens:
+    freq[palabra] += 1
+
+# Paso 3️⃣: Calcular probabilidad de cada palabra
+total = len(tokens)
+prob = {palabra: freq[palabra]/total for palabra in freq}
+
+print("🔹 Frecuencias:", freq)
+print("🔹 Probabilidades:", prob)
+
+# Paso 4️⃣: Generar oración aleatoria usando probabilidades
+def generar_oracion(n=5):
+    palabras = list(prob.keys())
+    probs = list(prob.values())
+    return " ".join(random.choices(palabras, probs, k=n))
+
+print("\n🗣️ Oración generada:", generar_oracion(6))

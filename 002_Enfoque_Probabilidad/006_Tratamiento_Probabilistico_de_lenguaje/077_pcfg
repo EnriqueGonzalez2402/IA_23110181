@@ -1,0 +1,26 @@
+# 77_PCFG.py
+# ==============================================
+# Ejemplo de Gramática Libre de Contexto Probabilística
+# ==============================================
+
+import random
+
+# Definimos una gramática probabilística simple
+pcfg = {
+    "S": [("NP VP", 1.0)],
+    "NP": [("Det N", 0.6), ("N", 0.4)],
+    "VP": [("V NP", 0.7), ("V", 0.3)],
+    "Det": [("el", 0.5), ("la", 0.5)],
+    "N": [("perro", 0.4), ("gato", 0.3), ("ratón", 0.3)],
+    "V": [("corre", 0.5), ("salta", 0.3), ("duerme", 0.2)]
+}
+
+# Generación de oración según la PCFG
+def generar_simbolo(simbolo):
+    if simbolo not in pcfg:
+        return simbolo
+    reglas, probs = zip(*pcfg[simbolo])
+    expansion = random.choices(reglas, probs)[0]
+    return " ".join(generar_simbolo(s) for s in expansion.split())
+
+print("🧩 Oración generada:", generar_simbolo("S"))
