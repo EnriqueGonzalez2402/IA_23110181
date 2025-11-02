@@ -1,0 +1,49 @@
+# Implementación manual de red con retropropagación (XOR)
+# ----------------------------------------------------------
+import numpy as np
+
+np.random.seed(1)
+X = np.array([[0,0],[0,1],[1,0],[1,1]])
+y = np.array([[0],[1],[1],[0]])
+
+# Parámetros
+input_size = 2
+hidden_size = 2
+output_size = 1
+alpha = 0.5
+epochs = 10000
+
+# Inicialización de pesos
+W1 = np.random.randn(input_size, hidden_size)
+b1 = np.zeros((1, hidden_size))
+W2 = np.random.randn(hidden_size, output_size)
+b2 = np.zeros((1, output_size))
+
+# Funciones
+sigmoid = lambda x: 1/(1+np.exp(-x))
+dsigmoid = lambda x: x*(1-x)
+
+for epoch in range(epochs):
+    # Forward
+    z1 = np.dot(X, W1) + b1
+    a1 = sigmoid(z1)
+    z2 = np.dot(a1, W2) + b2
+    y_hat = sigmoid(z2)
+
+    # Error
+    error = y - y_hat
+    if epoch % 1000 == 0:
+        print(f"Época {epoch}, Error promedio: {np.mean(np.abs(error)):.4f}")
+
+    # Backprop
+    d2 = error * dsigmoid(y_hat)
+    d1 = d2.dot(W2.T) * dsigmoid(a1)
+
+    # Actualización
+    W2 += a1.T.dot(d2) * alpha
+    b2 += np.sum(d2, axis=0, keepdims=True) * alpha
+    W1 += X.T.dot(d1) * alpha
+    b1 += np.sum(d1, axis=0, keepdims=True) * alpha
+
+print("\nPredicciones finales:")
+print(y_hat.round(3))
