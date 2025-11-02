@@ -1,0 +1,29 @@
+# Ejemplo simple de Recuperación de Información (IR)
+# ==============================================
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Pequeña base de datos de documentos
+documentos = [
+    "El gato duerme todo el día",
+    "El perro corre por el parque",
+    "Los pájaros cantan en el amanecer",
+    "El gato corre tras el ratón"
+]
+
+# Consulta del usuario
+consulta = ["el gato corre"]
+
+# Paso 1️⃣: Calcular TF-IDF
+vectorizer = TfidfVectorizer()
+tfidf = vectorizer.fit_transform(documentos + consulta)
+
+# Paso 2️⃣: Calcular similitud coseno entre consulta y documentos
+similitudes = cosine_similarity(tfidf[-1], tfidf[:-1]).flatten()
+
+# Paso 3️⃣: Mostrar documentos más relevantes
+ranking = similitudes.argsort()[::-1]
+print("\n🔍 Resultados más relevantes:")
+for i in ranking:
+    print(f"({similitudes[i]:.2f}) {documentos[i]}")

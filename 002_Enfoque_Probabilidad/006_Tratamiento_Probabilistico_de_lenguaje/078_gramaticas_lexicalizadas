@@ -1,0 +1,24 @@
+# ==============================================
+# Gramática Lexicalizada: asocia cada categoría a una palabra núcleo
+# ==============================================
+
+import random
+
+# Definimos una gramática con “palabras cabeza” (head words)
+gramatica = {
+    "S": [("NP VP", 1.0)],
+    "NP": [("Det N(perro)", 0.5), ("Det N(gato)", 0.5)],
+    "VP": [("V(corre) NP", 0.5), ("V(duerme)", 0.5)]
+}
+
+def expandir(simbolo):
+    if "(" in simbolo:
+        # Si tiene una palabra (núcleo)
+        return simbolo.split("(")[1].split(")")[0]
+    if simbolo not in gramatica:
+        return simbolo
+    reglas, probs = zip(*gramatica[simbolo])
+    regla = random.choices(reglas, probs)[0]
+    return " ".join(expandir(s) for s in regla.split())
+
+print("💬 Oración lexicalizada:", expandir("S"))
