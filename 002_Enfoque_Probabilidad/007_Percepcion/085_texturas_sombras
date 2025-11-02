@@ -1,47 +1,38 @@
-# - Local Binary Patterns (LBP) para describir textura
-# - filtros Gabor para detectar orientaciones (textura)
-# - sombreado simple mediante detección de iluminación
-# Requisitos: scikit-image, cv2, numpy, matplotlib
-# ------------------------------------------------------------
+# Análisis de texturas y sombras usando Local Binary Pattern (LBP) y filtros de Gabor
+# Requiere: pip install opencv-python scikit-image matplotlib numpy
+
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 from skimage.feature import local_binary_pattern
+import matplotlib.pyplot as plt
 
-# Cargar imagen en gris
-img = cv2.imread("texture.jpg")
-if img is None:
-    # crear textura sintética (ruido + patrones)
-    img = np.zeros((200,200,3), dtype=np.uint8)
-    img[::2, ::2] = (150,150,150)
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# Cargar imagen
+ruta_imagen = r"C:\Users\Kriki\OneDrive\Documentos\GitHub\IA_23110181\texturas.png"
+imagen = cv2.imread(ruta_imagen)
+if imagen is None:
+    raise ValueError("No se pudo cargar la imagen. Verifica la ruta y el nombre del archivo.")
 
-# LBP: parámetros (P puntos, R radio)
-P = 8
-R = 1
-lbp = local_binary_pattern(gray, P, R, method='uniform')
+# Convertir a escala de grises
+gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
 
-# Histograma de LBP (característica de textura)
-n_bins = int(lbp.max() + 1)
-hist, _ = np.histogram(lbp.ravel(), bins=n_bins, range=(0, n_bins), density=True)
+# --- Local Binary Pattern ---
+radius = 3
+n_points = 8 * radius
+lbp = local_binary_pattern(gris, n_points, radius, method='uniform')
 
-# Filtros Gabor: varias frecuencias y orientaciones
-gabor_responses = []
-for theta in [0, np.pi/4, np.pi/2, 3*np.pi/4]:
-    kern = cv2.getGaborKernel((21,21), sigma=4.0, theta=theta, lambd=10.0, gamma=0.5, psi=0)
-    fimg = cv2.filter2D(gray, cv2.CV_8UC3, kern)
-    gabor_responses.append(fimg)
+# --- Filtros Gabor ---
+kernels = []
+for theta in np.arange(0, np.pi, np.pi / 4):
+    kern = cv2.getGaborKernel((21,21), 5, theta, 10, 0.5, 0, ktype=cv2.CV_32F)
+    kernels.append(kern)
 
-# Detección simple de "sombra": buscar regiones con baja intensidad relativa
-normalized = cv2.equalizeHist(gray)
-shadow_mask = normalized < np.percentile(normalized, 30)  # umbral simple
+responses = [cv2.filter2D(gris, cv2.CV_8UC3, k) for k in kernels]
 
-# Mostrar
-plt.figure(figsize=(12,8))
-plt.subplot(2,3,1); plt.title("Gris"); plt.imshow(gray, cmap='gray'); plt.axis('off')
-plt.subplot(2,3,2); plt.title("LBP"); plt.imshow(lbp, cmap='inferno'); plt.axis('off')
-plt.subplot(2,3,3); plt.title("Histograma LBP"); plt.bar(range(n_bins), hist); plt.tight_layout()
-for i, resp in enumerate(gabor_responses):
-    plt.subplot(2,3,4+i); plt.title(f"Gabor θ={i}"); plt.imshow(resp, cmap='gray'); plt.axis('off')
-plt.figure(); plt.title("Mask sombra (umbral)"); plt.imshow(shadow_mask, cmap='gray'); plt.axis('off')
+# --- Mostrar resultados ---
+plt.figure(figsize=(12,6))
+plt.subplot(2,3,1); plt.imshow(gris, cmap='gray'); plt.title("Original"); plt.axis('off')
+plt.subplot(2,3,2); plt.imshow(lbp, cmap='gray'); plt.title("LBP"); plt.axis('off')
+for i, resp in enumerate(responses):
+    plt.subplot(2,3,3+i); plt.imshow(resp, cmap='gray'); plt.title(f"Gabor θ={i*np.pi/4:.2f}"); plt.axis('off')
+plt.tight_layout()
 plt.show()

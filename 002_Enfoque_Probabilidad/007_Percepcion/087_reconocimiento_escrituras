@@ -1,0 +1,32 @@
+# Reconocimiento de texto en imágenes usando pytesseract
+# Requiere: pip install pytesseract opencv-python
+# También instalar Tesseract OCR en tu máquina
+
+import cv2
+import pytesseract
+
+# Configurar ruta de Tesseract si es necesario
+# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# Cargar imagen
+ruta_imagen = r"C:\Users\Kriki\OneDrive\Documentos\GitHub\IA_23110181\texturas.png"
+imagen = cv2.imread(ruta_imagen)
+if imagen is None:
+    raise ValueError("No se pudo cargar la imagen. Verifica la ruta y el nombre del archivo.")
+
+# Convertir a escala de grises
+gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+
+# Aplicar umbral para mejorar contraste
+_, umbral = cv2.threshold(gris, 150, 255, cv2.THRESH_BINARY)
+
+# Extraer texto usando OCR
+texto = pytesseract.image_to_string(umbral, lang='eng')  # Cambiar a 'spa' para español
+
+print("Texto detectado:")
+print(texto)
+
+# Mostrar imagen procesada
+cv2.imshow("Imagen OCR", umbral)
+cv2.waitKey(0)
+cv2.destroyAllWindows()

@@ -1,0 +1,32 @@
+# Detección de objetos mediante contornos y rectángulos
+# Requiere: pip install opencv-python numpy
+
+import cv2
+import numpy as np
+
+# Cargar imagen
+ruta_imagen = r"C:\Users\Kriki\OneDrive\Documentos\GitHub\IA_23110181\texturas.png"
+imagen = cv2.imread(ruta_imagen)
+if imagen is None:
+    raise ValueError("No se pudo cargar la imagen. Verifica la ruta y el nombre del archivo.")
+
+# Convertir a escala de grises
+gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+
+# Aplicar umbral para separar objetos del fondo
+_, thresh = cv2.threshold(gris, 127, 255, cv2.THRESH_BINARY_INV)
+
+# Encontrar contornos
+contornos, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# Dibujar rectángulos alrededor de cada objeto
+for c in contornos:
+    x, y, w, h = cv2.boundingRect(c)
+    cv2.rectangle(imagen, (x,y), (x+w, y+h), (0,255,0), 2)
+
+print(f"Se detectaron {len(contornos)} objetos.")
+
+# Mostrar imagen final
+cv2.imshow("Objetos Detectados", imagen)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
