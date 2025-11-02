@@ -1,0 +1,220 @@
+# - Entrena un IBM Model 1 (P(e|f)) a partir de un corpus paralelo pequeño
+# - Construye un lenguaje objetivo (unigram + bigram) en inglés
+# - Decodifica mediante BEAM SEARCH combinando:
+#       score = lambda_t * sum log P(e_i | f_i)  +  lambda_lm * sum log P(e_i | e_{i-1})
+# - Maneja palabras desconocidas mostrando [palabra]
+# ----------------------------------------------------
+
+import math
+import random
+from collections import defaultdict, Counter
+from itertools import product
+
+# ---------------------------
+# 1) Corpus paralelo (pequeño)
+# ---------------------------
+corpus_es = [
+    "el gato duerme",
+    "el perro come",
+    "ella corre rápido",
+    "ellos estudian mucho",
+    "yo leo un libro",
+    "el niño juega en el parque"
+]
+
+corpus_en = [
+    "the cat sleeps",
+    "the dog eats",
+    "she runs fast",
+    "they study a lot",
+    "i read a book",
+    "the boy plays in the park"
+]
+
+# Preprocesamiento mínimo (split por espacios; en proyectos reales limpiar/minusculizar/tokenizar mejor)
+pairs = list(zip(corpus_es, corpus_en))
+print(f"Corpus paralelo: {len(pairs)} pares.\n")
+
+# ---------------------------
+# 2) Construcción de vocabularios
+# ---------------------------
+vocab_es = set()
+vocab_en = set()
+for es, en in pairs:
+    for w in es.split():
+        vocab_es.add(w)
+    for w in en.split():
+        vocab_en.add(w)
+
+vocab_es = sorted(vocab_es)
+vocab_en = sorted(vocab_en)
+
+# ---------------------------
+# 3) Inicialización P(e|f) uniforme (IBM Model 1 like)
+# ---------------------------
+P = {f: {e: 1.0/len(vocab_en) for e in vocab_en} for f in vocab_es}
+
+# ---------------------------
+# 4) Entrenamiento simplificado IBM Model 1 (EM)
+# ---------------------------
+def train_ibm1(pairs, P, iterations=10):
+    """Entrena P(e|f) por EM (IBM Model 1 style)."""
+    for it in range(iterations):
+        # contadores esperados
+        count = {f: {e: 0.0 for e in vocab_en} for f in vocab_es}
+        total_f = {f: 0.0 for f in vocab_es}
+
+        for es, en in pairs:
+            words_f = es.split()
+            words_e = en.split()
+
+            # s_total(e) = sum_f P(e|f) para normalizar responsabilidades
+            s_total = {}
+            for e in words_e:
+                s_total[e] = sum(P[f][e] for f in words_f if f in P)
+
+            # acumular fracciones
+            for e in words_e:
+                denom = s_total[e] if s_total[e] > 0 else 1e-12
+                for f in words_f:
+                    if f not in P:
+                        continue
+                    c = P[f][e] / denom
+                    count[f][e] += c
+                    total_f[f] += c
+
+        # reestimación P(e|f) = count[f][e] / total_f[f]
+        for f in vocab_es:
+            denom = total_f[f] if total_f[f] > 0 else 1e-12
+            for e in vocab_en:
+                P[f][e] = count[f][e] / denom
+
+        # opcional: imprime progreso ligero
+        if (it+1) % (iterations//2 if iterations>=2 else 1) == 0:
+            print(f"  EM iter {it+1}/{iterations} completada")
+    return P
+
+# Ejecutamos entrenamiento
+P = train_ibm1(pairs, P, iterations=8)
+print("Entrenamiento IBM1 completado.\n")
+
+# ---------------------------
+# 5) Construir Language Model (unigram + bigram) en inglés
+# ---------------------------
+def build_unigram_bigram(corpus_en):
+    unigram = Counter()
+    bigram = Counter()
+    total = 0
+    for sent in corpus_en:
+        words = sent.split()
+        total += len(words)
+        for i, w in enumerate(words):
+            unigram[w] += 1
+            if i > 0:
+                bigram[(words[i-1], w)] += 1
+    # convertir a probabilidades (MLE) con smoothing al evaluar
+    return unigram, bigram, total
+
+unigram, bigram, total_unigrams = build_unigram_bigram(corpus_en)
+
+# Funciones de prob. con suavizado add-k
+def prob_unigram(w, k=1e-3):
+    # P(w) ≈ (count(w) + k) / (total + k*V)
+    V = len(unigram)
+    return (unigram.get(w, 0) + k) / (total_unigrams + k * V)
+
+def prob_bigram(w_prev, w, k=1e-3):
+    # P(w | w_prev) ≈ (count(w_prev,w) + k) / (count(w_prev) + k*V)
+    V = len(unigram)
+    denom = unigram.get(w_prev, 0) + k * V
+    return (bigram.get((w_prev, w), 0) + k) / (denom if denom>0 else 1e-12)
+
+# ---------------------------
+# 6) Decodificador: BEAM SEARCH combinando P(e|f) y LM
+# ---------------------------
+def top_k_translations(f_word, P, k=5):
+    """Devuelve las k candidatas en inglés para la palabra española f_word, ordenadas por P(e|f)."""
+    if f_word not in P:
+        return []  # palabra desconocida
+    # Ordenamos por prob descendente
+    items = sorted(P[f_word].items(), key=lambda x: x[1], reverse=True)
+    return [e for e,_ in items[:k]]
+
+def score_sequence(seq_words, src_words, P, lambda_t=1.0, lambda_lm=1.0):
+    """
+    Score de una secuencia inglesa `seq_words` alineada 1-1 con src_words:
+    score = lambda_t * sum log P(e_i|f_i)  +  lambda_lm * sum log P(e_i | e_{i-1})
+    (usamos logs para evitar underflow)
+    """
+    sc = 0.0
+    for i, e in enumerate(seq_words):
+        f = src_words[i]
+        # prob de traducción (si f desconocida, dar un pequeño penal)
+        p_tf = P.get(f, {}).get(e, 1e-12)
+        sc += lambda_t * math.log(p_tf + 1e-12)
+        # prob del lenguaje (bigram) si no es la primera palabra, sino unigram
+        if i == 0:
+            sc += lambda_lm * math.log(prob_unigram(e) + 1e-12)
+        else:
+            sc += lambda_lm * math.log(prob_bigram(seq_words[i-1], e) + 1e-12)
+    return sc
+
+def beam_decode(src_sentence, P, beam_width=5, top_k=5, lambda_t=1.0, lambda_lm=1.0):
+    """
+    Decodificación por beam:
+    - Para cada palabra fuente, obtenemos top_k candidatos
+    - Construimos secuencias incrementales y mantenemos las beam_width mejores según el score
+    - Retornamos la mejor secuencia final
+    """
+    src_words = src_sentence.split()
+    # candidatos por posición
+    candidates = [top_k_translations(f, P, k=top_k) for f in src_words]
+
+    # si alguna palabra no tiene candidatos (desconocida), la representamos como [f]
+    for i, cand in enumerate(candidates):
+        if not cand:
+            candidates[i] = [f"[{src_words[i]}]"]
+
+    # beam: lista de (seq_words_list, score)
+    beam = [ ([], 0.0) ]
+
+    for i, f in enumerate(src_words):
+        new_beam = []
+        for seq, sc in beam:
+            for e in candidates[i]:
+                new_seq = seq + [e]
+                # compute incremental score (we recompute whole seq for clarity; could be incremental)
+                new_sc = score_sequence(new_seq, src_words[:i+1], P, lambda_t, lambda_lm)
+                new_beam.append((new_seq, new_sc))
+        # keep top beam_width
+        new_beam.sort(key=lambda x: x[1], reverse=True)
+        beam = new_beam[:beam_width]
+
+    # best final sequence
+    best_seq, best_sc = max(beam, key=lambda x: x[1])
+    return " ".join(best_seq), best_sc
+
+# ---------------------------
+# 7) Pruebas con frases de ejemplo
+# ---------------------------
+test_sentences = [
+    "el gato come",
+    "ella estudia rápido",
+    "yo juego en el parque",
+    "el perro corre",
+    "el niño lee un libro"
+]
+
+print("Decodificando con beam search + LM...\n")
+for s in test_sentences:
+    translation, score = beam_decode(s, P, beam_width=10, top_k=5, lambda_t=1.0, lambda_lm=0.8)
+    print(f"ES: {s}")
+    print(f"EN: {translation}   (score={score:.2f})\n")
+
+# ---------------------------
+# 8) Observaciones finales impresas
+# ---------------------------
+print("Notas:")
+print("- El modelo sigue siendo simplificado. Con poco paralelismo y pocos ejemplos, seguirá habiendo errores.")
+print("- Beam + LM ayuda con el orden y la fluidez (preferirá secuencias frecuentes en el inglés del corpus).")
+print("- Para mejorar aún más: aumentar corpus paralelo, usar modelos phrase-based o modelos neuronales seq2seq, y usar un LM preentrenado grande.")

@@ -1,0 +1,13 @@
+import spacy
+
+# Cargar modelo de lenguaje en español
+nlp = spacy.load("es_core_news_sm")
+
+texto = "El presidente Andrés Manuel López Obrador visitó Oaxaca el 10 de mayo de 2025."
+
+# Analizar texto
+doc = nlp(texto)
+
+print("🧠 Entidades reconocidas:")
+for ent in doc.ents:
+    print(f" - {ent.text} ({ent.label_})")
