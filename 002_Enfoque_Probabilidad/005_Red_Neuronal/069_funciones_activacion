@@ -1,0 +1,25 @@
+# Comparación visual de funciones de activación
+# ----------------------------------------------------------
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(-5,5,400)
+
+# Diferentes activaciones
+step = np.where(x>=0,1,0)
+sigmoid = 1 / (1 + np.exp(-x))
+tanh = np.tanh(x)
+relu = np.maximum(0,x)
+leaky_relu = np.where(x>0, x, 0.1*x)
+
+plt.figure(figsize=(10,6))
+plt.plot(x, step, label='Escalón')
+plt.plot(x, sigmoid, label='Sigmoide')
+plt.plot(x, tanh, label='tanh')
+plt.plot(x, relu, label='ReLU')
+plt.plot(x, leaky_relu, label='Leaky ReLU')
+plt.legend()
+plt.title("Funciones de activación")
+plt.xlabel("x"); plt.ylabel("f(x)")
+plt.grid(True)
+plt.show()

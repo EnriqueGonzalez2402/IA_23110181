@@ -1,0 +1,47 @@
+# Ejemplo de Perceptrón y ADALINE para compuerta lógica AND
+# ----------------------------------------------------------
+import numpy as np
+import matplotlib.pyplot as plt
+
+X = np.array([[0,0],[0,1],[1,0],[1,1]])
+y = np.array([0,0,0,1])
+
+# ===== PERCEPTRÓN =====
+def step(x): return np.where(x>=0,1,0)
+w_p = np.random.randn(2)
+b_p = np.random.randn(1)
+alpha = 0.1
+
+errors_p = []
+for epoch in range(30):
+    total_err = 0
+    for i in range(len(X)):
+        y_pred = step(np.dot(X[i],w_p)+b_p)
+        e = y[i] - y_pred
+        w_p += alpha * e * X[i]
+        b_p += alpha * e
+        total_err += abs(e)
+    errors_p.append(total_err)
+
+# ===== ADALINE =====
+def linear(x): return x
+w_a = np.random.randn(2)
+b_a = np.random.randn(1)
+errors_a = []
+for epoch in range(30):
+    total_err = 0
+    for i in range(len(X)):
+        y_pred = linear(np.dot(X[i],w_a)+b_a)
+        e = y[i] - y_pred
+        w_a += alpha * e * X[i]
+        b_a += alpha * e
+        total_err += e**2
+    errors_a.append(total_err)
+
+# Graficar convergencia
+plt.figure(figsize=(8,4))
+plt.plot(errors_p, label="Perceptrón")
+plt.plot(errors_a, label="ADALINE")
+plt.xlabel("Época"); plt.ylabel("Error")
+plt.legend(); plt.title("Comparación Perceptrón vs ADALINE")
+plt.show()

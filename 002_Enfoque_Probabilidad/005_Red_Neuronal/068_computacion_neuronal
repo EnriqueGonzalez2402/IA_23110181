@@ -1,0 +1,39 @@
+# Ejemplo de una neurona artificial simple (modelo de McCulloch-Pitts)
+# Aprendizaje manual para comportarse como compuerta lógica AND
+# ----------------------------------------------------------
+import numpy as np
+
+# Entradas de la compuerta AND
+X = np.array([[0,0],[0,1],[1,0],[1,1]])
+y = np.array([0,0,0,1])  # salida AND
+
+# Inicialización de pesos y sesgo (bias)
+w = np.random.rand(2)
+b = np.random.rand(1)
+alpha = 0.1  # tasa de aprendizaje
+
+# Función de activación (escalón)
+def step(x):
+    return 1 if x >= 0 else 0
+
+# Entrenamiento
+for epoch in range(20):
+    total_error = 0
+    for i in range(len(X)):
+        z = np.dot(X[i], w) + b
+        y_pred = step(z)
+        error = y[i] - y_pred
+        # Regla de actualización
+        w = w + alpha * error * X[i]
+        b = b + alpha * error
+        total_error += abs(error)
+    print(f"Época {epoch+1}: error total = {total_error}")
+    if total_error == 0:
+        break
+
+print("\nPesos finales:", w)
+print("Bias final:", b)
+
+# Prueba
+for x in X:
+    print(f"{x} -> {step(np.dot(x,w)+b)}")
