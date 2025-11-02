@@ -1,0 +1,60 @@
+# Contiene:
+# - implementación simple de kNN desde cero
+# - implementación de K-means (iterativa)
+# - dataset sintético más amplio y visualización
+# ----------------------------------------------------
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
+
+np.random.seed(0)
+
+# ---------- Generar dataset sintético (3 clases) ----------
+N_per_class = 250
+c1 = np.random.randn(N_per_class, 2) + np.array([0, 0])    # clase 0
+c2 = np.random.randn(N_per_class, 2) + np.array([5, 5])    # clase 1
+c3 = np.random.randn(N_per_class, 2) + np.array([10, 0])   # clase 2
+X = np.vstack([c1, c2, c3])
+y = np.array([0]*N_per_class + [1]*N_per_class + [2]*N_per_class)
+
+# mezclar
+perm = np.random.permutation(len(X))
+X = X[perm]; y = y[perm]
+
+# dividir en train/test
+split = int(0.8 * len(X))
+X_train, X_test = X[:split], X[split:]
+y_train, y_test = y[:split], y[split:]
+
+# ---------- kNN desde cero ----------
+def knn_predict(X_train, y_train, x_query, k=5):
+    # calcular distancias euclidianas
+    dists = np.linalg.norm(X_train - x_query, axis=1)
+    idx = np.argsort(dists)[:k]
+    votes = Counter(y_train[idx])
+    return votes.most_common(1)[0][0]
+
+# evaluar kNN en test
+k = 7
+preds = np.array([knn_predict(X_train, y_train, xq, k) for xq in X_test])
+acc = np.mean(preds == y_test)
+print(f"kNN accuracy (k={k}): {acc:.3f}")
+
+# ---------- K-means (implementación simple) ----------
+def kmeans(X, k=3, max_iter=100):
+    centroids = X[np.random.choice(len(X), k, replace=False)]
+    for it in range(max_iter):
+        dist = np.linalg.norm(X[:, None] - centroids[None, :], axis=2)
+        labels = np.argmin(dist, axis=1)
+        new_centroids = np.array([X[labels == j].mean(axis=0) if np.any(labels==j) else centroids[j] for j in range(k)])
+        if np.allclose(new_centroids, centroids):
+            break
+        centroids = new_centroids
+    return centroids, labels
+
+centroids, labels = kmeans(X, k=3)
+plt.figure(figsize=(8,5))
+plt.scatter(X[:,0], X[:,1], c=labels, cmap='viridis', alpha=0.6)
+plt.scatter(centroids[:,0], centroids[:,1], color='red', marker='x', s=100)
+plt.title("K-means clustering (3 clusters)")
+plt.show()
