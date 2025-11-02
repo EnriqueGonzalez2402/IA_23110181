@@ -1,0 +1,33 @@
+# Demostración de redes asociativas: Hopfield y Hebb
+# ----------------------------------------------------------
+import numpy as np
+
+# Patrón binario (3x3 imágenes aplanadas)
+P1 = np.array([1,1,1,1,-1,1,1,1,1])   # cuadrado lleno
+P2 = np.array([1,-1,1,-1,1,-1,1,-1,1]) # cruz
+
+patterns = np.stack([P1,P2])
+
+# ======= Aprendizaje por REGLA DE HEBB =======
+# W = sum(p_i * p_i^T)
+W_hebb = np.dot(patterns.T, patterns)
+np.fill_diagonal(W_hebb, 0)  # sin auto-conexiones
+print("Matriz de pesos Hebb:\n", W_hebb)
+
+# ======= Red de HOPFIELD =======
+def hopfield_recall(W, pattern, steps=5):
+    state = pattern.copy()
+    for _ in range(steps):
+        state = np.sign(W @ state)
+    return state
+
+# probar recuperación con ruido
+test = P1.copy()
+test[2] = -1  # ruido
+print("\nEntrada ruidosa:", test)
+recovered = hopfield_recall(W_hebb, test)
+print("Salida recuperada:", recovered)
+
+# Mostrar energía (criterio Hopfield)
+E = -0.5 * test @ W_hebb @ test.T
+print("Energía del estado:", E)

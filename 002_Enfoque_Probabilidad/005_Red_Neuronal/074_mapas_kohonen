@@ -1,0 +1,49 @@
+# Implementación simple de Mapa Autoorganizado (SOM)
+# ----------------------------------------------------------
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(0)
+
+# Dataset: tres grupos
+data = np.vstack([
+    np.random.randn(100,2)*0.5 + np.array([0,0]),
+    np.random.randn(100,2)*0.5 + np.array([3,3]),
+    np.random.randn(100,2)*0.5 + np.array([0,4])
+])
+
+# Parámetros del SOM
+rows, cols = 10, 10
+alpha = 0.5
+sigma = max(rows, cols)/2
+epochs = 100
+
+# Inicialización de pesos (rejilla)
+weights = np.random.rand(rows, cols, 2)
+
+def distance(a,b): return np.linalg.norm(a-b)
+def neighborhood(center, sigma):
+    r = np.arange(rows)
+    c = np.arange(cols)
+    R, C = np.meshgrid(r,c)
+    d = (R-center[0])**2 + (C-center[1])**2
+    return np.exp(-d/(2*sigma**2))
+
+for epoch in range(epochs):
+    for x in data:
+        # encontrar neurona ganadora
+        dists = np.linalg.norm(weights - x, axis=2)
+        winner = np.unravel_index(np.argmin(dists), (rows,cols))
+        # actualizar vecindario
+        h = neighborhood(winner, sigma)
+        weights += alpha * h[:,:,None] * (x - weights)
+    # decaimiento
+    alpha *= 0.95
+    sigma *= 0.95
+
+# Visualización
+plt.figure(figsize=(6,6))
+plt.scatter(data[:,0],data[:,1],alpha=0.3,label='Datos')
+plt.scatter(weights[:,:,0],weights[:,:,1],color='r',label='Neuronas SOM')
+plt.title("Mapa Autoorganizado de Kohonen")
+plt.legend(); plt.show()
