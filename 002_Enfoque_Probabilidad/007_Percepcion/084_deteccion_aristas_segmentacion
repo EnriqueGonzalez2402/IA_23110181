@@ -1,0 +1,53 @@
+# - detección de bordes: Sobel y Canny
+# - segmentación: threshold + contours + watershed
+# ------------------------------------------------------------
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import ndimage as ndi
+
+# Cargar imagen o usar sintética
+img = cv2.imread("input.jpg")
+if img is None:
+    img = np.zeros((300,300,3), dtype=np.uint8)
+    cv2.circle(img, (100,150), 60, (255,255,255), -1)
+    cv2.circle(img, (200,150), 60, (255,255,255), -1)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Sobel (gradientes en x e y)
+sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+sobel_mag = np.hypot(sobelx, sobely)
+sobel_mag = np.uint8(255 * sobel_mag / np.max(sobel_mag))
+
+# Canny (mejor para contornos)
+edges = cv2.Canny(gray, 50, 150)
+
+# Segmentación con umbral + watershed para separar objetos tocando
+ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+# eliminación de ruido con apertura
+kernel = np.ones((3,3), np.uint8)
+opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+# sure background y sure foreground
+sure_bg = cv2.dilate(opening, kernel, iterations=3)
+dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
+ret2, sure_fg = cv2.threshold(dist_transform, 0.5*dist_transform.max(), 255, 0)
+sure_fg = np.uint8(sure_fg)
+unknown = cv2.subtract(sure_bg, sure_fg)
+# markers para watershed
+ret3, markers = cv2.connectedComponents(sure_fg)
+markers = markers + 1
+markers[unknown == 255] = 0
+markers = cv2.watershed(cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR), markers)
+# fronteras marcadas con -1 en markers
+
+# Mostrar resultados
+plt.figure(figsize=(12,8))
+plt.subplot(2,3,1); plt.title("Original"); plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)); plt.axis('off')
+plt.subplot(2,3,2); plt.title("Sobel Magnitud"); plt.imshow(sobel_mag, cmap='gray'); plt.axis('off')
+plt.subplot(2,3,3); plt.title("Canny"); plt.imshow(edges, cmap='gray'); plt.axis('off')
+plt.subplot(2,3,4); plt.title("Threshold Otsu"); plt.imshow(thresh, cmap='gray'); plt.axis('off')
+plt.subplot(2,3,5); plt.title("Distance Transform"); plt.imshow(dist_transform, cmap='jet'); plt.axis('off')
+plt.subplot(2,3,6); plt.title("Watershed (marcadores)"); plt.imshow(markers, cmap='tab20'); plt.axis('off')
+plt.tight_layout()
+plt.show()
