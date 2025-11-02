@@ -1,0 +1,35 @@
+# - detectar líneas con Hough Transform (probabilística)
+# - etiquetar líneas: calcular ángulo y longitud y superponer texto
+# ------------------------------------------------------------
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+img = cv2.imread("lines.jpg")
+if img is None:
+    img = np.zeros((300,400,3), dtype=np.uint8)
+    cv2.line(img, (20,50),(380,50),(255,255,255),2)
+    cv2.line(img, (20,200),(380,250),(255,255,255),3)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+edges = cv2.Canny(gray, 50, 150)
+
+# Hough probabilística: devuelve segmentos (x1,y1,x2,y2)
+lines = cv2.HoughLinesP(edges, rho=1, theta=np.pi/180, threshold=50, minLineLength=30, maxLineGap=10)
+
+canvas = img.copy()
+if lines is not None:
+    for idx, line in enumerate(lines):
+        x1,y1,x2,y2 = line[0]
+        cv2.line(canvas, (x1,y1),(x2,y2),(0,255,0),2)
+        # calcular longitud y angulo (grados)
+        length = np.hypot(x2-x1, y2-y1)
+        angle = np.degrees(np.arctan2(y2-y1, x2-x1))
+        # superponer etiqueta cerca del centro del segmento
+        cx, cy = int((x1+x2)/2), int((y1+y2)/2)
+        label = f"#{idx}: L={int(length)} a={int(angle)}°"
+        cv2.putText(canvas, label, (cx+5, cy-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1)
+
+plt.figure(figsize=(8,5))
+plt.subplot(1,2,1); plt.title("Edges"); plt.imshow(edges, cmap='gray'); plt.axis('off')
+plt.subplot(1,2,2); plt.title("Líneas etiquetadas"); plt.imshow(cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)); plt.axis('off')
+plt.show()
