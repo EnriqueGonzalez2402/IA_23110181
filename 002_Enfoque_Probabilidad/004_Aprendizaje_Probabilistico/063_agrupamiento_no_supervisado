@@ -1,0 +1,33 @@
+# Ejemplo de K-Means Clustering (sin etiquetas)
+# ---------------------------------------------------
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generamos datos 2D de tres grupos
+np.random.seed(0)
+grupo1 = np.random.randn(50, 2) + np.array([0, 0])
+grupo2 = np.random.randn(50, 2) + np.array([5, 5])
+grupo3 = np.random.randn(50, 2) + np.array([10, 0])
+data = np.vstack([grupo1, grupo2, grupo3])
+
+# Inicialización aleatoria de centroides
+k = 3
+centroides = data[np.random.choice(len(data), k, replace=False)]
+
+for _ in range(10):
+    # Asignar cada punto al centro más cercano
+    distancias = np.linalg.norm(data[:, None] - centroides, axis=2)
+    etiquetas = np.argmin(distancias, axis=1)
+
+    # Recalcular centroides
+    nuevos_centroides = np.array([data[etiquetas == i].mean(axis=0) for i in range(k)])
+    if np.allclose(centroides, nuevos_centroides):
+        break
+    centroides = nuevos_centroides
+
+plt.scatter(data[:,0], data[:,1], c=etiquetas, cmap='viridis', alpha=0.6)
+plt.scatter(centroides[:,0], centroides[:,1], color='red', marker='x', s=100, label='Centroides')
+plt.legend()
+plt.title("Agrupamiento No Supervisado (K-Means)")
+plt.show()

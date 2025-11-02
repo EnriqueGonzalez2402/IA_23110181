@@ -1,0 +1,37 @@
+# ---------------------------------------------------
+# Ejemplo de Algoritmo EM (Expectation-Maximization)
+# Mezcla de dos distribuciones gaussianas
+# ---------------------------------------------------
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(0)
+# Generamos datos mezclados
+data = np.concatenate([np.random.normal(5, 1, 100), np.random.normal(10, 2, 100)])
+
+# Inicialización
+mu1, mu2 = 4, 9
+sigma1, sigma2 = 1, 1
+pi = 0.5
+
+for step in range(20):
+    # E-step: calcular responsabilidades
+    p1 = pi * np.exp(-0.5*((data-mu1)/sigma1)**2)/(sigma1*np.sqrt(2*np.pi))
+    p2 = (1-pi) * np.exp(-0.5*((data-mu2)/sigma2)**2)/(sigma2*np.sqrt(2*np.pi))
+    w1 = p1 / (p1 + p2)
+
+    # M-step: actualizar parámetros
+    mu1 = np.sum(w1 * data) / np.sum(w1)
+    mu2 = np.sum((1-w1) * data) / np.sum(1-w1)
+    sigma1 = np.sqrt(np.sum(w1*(data-mu1)**2)/np.sum(w1))
+    sigma2 = np.sqrt(np.sum((1-w1)*(data-mu2)**2)/np.sum(1-w1))
+    pi = np.mean(w1)
+
+plt.hist(data, bins=30, density=True, alpha=0.5, label='Datos')
+x = np.linspace(min(data), max(data), 200)
+plt.plot(x, pi*np.exp(-0.5*((x-mu1)/sigma1)**2)/(sigma1*np.sqrt(2*np.pi)), label='Componente 1')
+plt.plot(x, (1-pi)*np.exp(-0.5*((x-mu2)/sigma2)**2)/(sigma2*np.sqrt(2*np.pi)), label='Componente 2')
+plt.legend()
+plt.title("Algoritmo EM – Estimación de Mezclas Gaussianas")
+plt.show()
